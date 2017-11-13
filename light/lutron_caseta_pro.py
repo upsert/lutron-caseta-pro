@@ -15,7 +15,8 @@ from homeassistant.components.light import (
 from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_TYPE, CONF_NAME, CONF_ID)
 
 # pylint: disable=relative-beyond-top-level
-from ..lutron_caseta_pro import (Caseta, DEFAULT_TYPE, ATTR_AREA_NAME, CONF_AREA_NAME, ATTR_INTEGRATION_ID)
+from ..lutron_caseta_pro import (Caseta, DEFAULT_TYPE, ATTR_AREA_NAME, CONF_AREA_NAME,
+                                 ATTR_INTEGRATION_ID)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,26 +32,32 @@ class CasetaData:
 
     @property
     def devices(self):
+        """Return the device list."""
         return self._devices
 
     @property
     def caseta(self):
+        """Return a reference to Casetify instance."""
         return self._caseta
 
     def set_devices(self, devices):
+        """Set the device list."""
         self._devices = devices
 
     @asyncio.coroutine
     def read_output(self, mode, integration, action, value):
-        # find integration in devices
+        """Receive output value from the bridge."""
+        # find integration ID in devices
         if mode == Caseta.OUTPUT:
             for device in self._devices:
                 if device.integration == integration:
-                    _LOGGER.debug("Got OUTPUT value: %s %d %d %f", mode, integration, action, value)
+                    _LOGGER.debug("Got light OUTPUT value: %s %d %d %f",
+                                  mode, integration, action, value)
                     if action == Caseta.Action.SET:
                         device.update_state(value)
                         yield from device.async_update_ha_state()
                         break
+
 
 # pylint: disable=unused-argument
 @asyncio.coroutine
@@ -95,10 +102,12 @@ class CasetaLight(Light):
 
     @asyncio.coroutine
     def query(self):
+        """Query the bridge for the current level."""
         yield from self._data.caseta.query(Caseta.OUTPUT, self._integration, Caseta.Action.SET)
 
     @property
     def integration(self):
+        """Return the Integration ID."""
         return self._integration
 
     @property
@@ -138,10 +147,11 @@ class CasetaLight(Light):
                 value = (kwargs[ATTR_BRIGHTNESS] / 255) * 100
             if ATTR_TRANSITION in kwargs:
                 transition = ":" + str(kwargs[ATTR_TRANSITION])
-        _LOGGER.debug("Writing light OUTPUT value: %d %d %f %s", self._integration, Caseta.Action.SET, value,
+        _LOGGER.debug("Writing light OUTPUT value: %d %d %f %s",
+                      self._integration, Caseta.Action.SET, value,
                       str(transition))
-        yield from self._data.caseta.write(Caseta.OUTPUT, self._integration, Caseta.Action.SET, value,
-                                           transition)
+        yield from self._data.caseta.write(Caseta.OUTPUT, self._integration,
+                                           Caseta.Action.SET, value, transition)
 
     def async_turn_off(self, **kwargs):
         """Instruct the light to turn off."""
@@ -149,8 +159,8 @@ class CasetaLight(Light):
         if self._is_dimmer:
             if ATTR_TRANSITION in kwargs:
                 transition = ":" + str(kwargs[ATTR_TRANSITION])
-        _LOGGER.debug("Writing light OUTPUT value: %d %d off %s", self._integration, Caseta.Action.SET,
-                      str(transition))
+        _LOGGER.debug("Writing light OUTPUT value: %d %d off %s",
+                      self._integration, Caseta.Action.SET, str(transition))
         yield from self._data.caseta.write(Caseta.OUTPUT, self._integration, Caseta.Action.SET, 0,
                                            transition)
 

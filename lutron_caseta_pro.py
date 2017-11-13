@@ -57,12 +57,12 @@ CONFIG_SCHEMA = vol.Schema({
 @asyncio.coroutine
 def request_configuration(hass, config, host, bridge):
     """Request configuration from the user to configure a host."""
-
     configurator = hass.components.configurator
 
     if host in _CONFIGURING:
         configurator.notify_errors(_CONFIGURING[host],
-                                   "Failed to process Lutron Caseta Integration Report, please try again.")
+                                   "Failed to process Lutron Caseta Integration"
+                                   " Report, please try again.")
         return
 
     def setup_callback(data):
@@ -140,9 +140,9 @@ def async_setup(hass, config):
 
 @asyncio.coroutine
 def async_setup_bridge(hass, config, fname, bridge):
-    """Setup a bridge by loading its integration report."""
-
+    """Initialize a bridge by loading its integration report."""
     _LOGGER.debug("Setting up bridge using integration report %s", fname)
+
     devices = yield from casetify.async_load_integration_report(fname)
 
     # Patch up device types from configuration.
@@ -222,12 +222,14 @@ class Caseta:
         host_list = {}
 
         def __init__(self, host):
+            """Initialize bridge."""
             self._host = host
             self._casetify = None
             self._hass = None
             self._callbacks = []
 
         def __str__(self):
+            """Return self plus host name."""
             return repr(self) + self._host
 
         @asyncio.coroutine
@@ -309,6 +311,7 @@ class Caseta:
     Button = casetify.Casetify.Button
 
     def __init__(self, host):
+        """Initialize Caseta instance."""
         instance = None
         if host in Caseta.CasetaBridge.host_list:
             instance = Caseta.CasetaBridge.host_list[host]
@@ -318,7 +321,9 @@ class Caseta:
         super(Caseta, self).__setattr__("instance", instance)
 
     def __getattr__(self, name):
+        """Return getter on the instance."""
         return getattr(self.instance, name)
 
     def __setattr__(self, name, value):
+        """Return setter on the instance."""
         setattr(self.instance, name, value)

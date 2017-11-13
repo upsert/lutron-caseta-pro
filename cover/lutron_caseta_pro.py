@@ -45,11 +45,13 @@ class CasetaData:
 
     @asyncio.coroutine
     def read_output(self, mode, integration, action, value):
+        """Receive output value from the bridge."""
         # Expect: ~OUTPUT,Integration ID,Action Number,Parameters
         if mode == Caseta.OUTPUT:
             for device in self._devices:
                 if device.integration == integration:
-                    _LOGGER.debug("Got OUTPUT value: %s %d %d %f", mode, integration, action, value)
+                    _LOGGER.debug("Got cover OUTPUT value: %s %d %d %f",
+                                  mode, integration, action, value)
                     if action == Caseta.Action.SET:
                         # update zone level, e.g. 90.00
                         device.update_state(value)

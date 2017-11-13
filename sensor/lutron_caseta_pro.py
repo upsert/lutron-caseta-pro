@@ -7,14 +7,15 @@ Source: https://github.com/jhanssen/home-assistant/tree/caseta-0.40
 Additional Authors:
 upsert (https://github.com/upsert)
 """
-from homeassistant.helpers.entity import Entity
-from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_NAME, CONF_ID)
-
-# pylint: disable=relative-beyond-top-level
-from ..lutron_caseta_pro import (Caseta, CONF_BUTTONS, ATTR_AREA_NAME, CONF_AREA_NAME, ATTR_INTEGRATION_ID)
-
 import asyncio
 import logging
+
+from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_NAME, CONF_ID)
+from homeassistant.helpers.entity import Entity
+
+# pylint: disable=relative-beyond-top-level
+from ..lutron_caseta_pro import (Caseta, CONF_BUTTONS, ATTR_AREA_NAME,
+                                 CONF_AREA_NAME, ATTR_INTEGRATION_ID)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ DEPENDENCIES = ['lutron_caseta_pro']
 
 
 class CasetaData:
+    """Data holder for a sensor."""
     def __init__(self, caseta, hass):
         self._caseta = caseta
         self._hass = hass
@@ -31,36 +33,43 @@ class CasetaData:
 
     @property
     def devices(self):
+        """Return the device list."""
         return self._devices
 
     @property
     def caseta(self):
+        """Return a reference to Casetify instance."""
         return self._caseta
 
     def set_devices(self, devices):
+        """Set the device list."""
         self._devices = devices
 
     @asyncio.coroutine
     def _check_added(self):
+        """"Process and clear the added list."""
         yield from asyncio.sleep(15)
         _LOGGER.debug("Checking Caseta added")
         for integration in self._added:
-            _LOGGER.debug("Removing Caseta added %d %d", integration, self._added[integration])
+            _LOGGER.debug("Removing Caseta added %d %d", integration,
+                          self._added[integration])
             for device in self._devices:
                 if device.integration == integration:
                     device.update_state(device.state & ~self._added[integration])
                     yield from device.async_update_ha_state()
-                    _LOGGER.debug("Removed Caseta added %d %d", integration, self._added[integration])
+                    _LOGGER.debug("Removed Caseta added %d %d",
+                                  integration, self._added[integration])
                     break
         self._added.clear()
 
     @asyncio.coroutine
     def read_output(self, mode, integration, action, value):
-        # find integration in devices
+        """Receive output value from the bridge."""
         if mode == Caseta.DEVICE:
             for device in self._devices:
                 if device.integration == integration:
-                    _LOGGER.debug("Got DEVICE value: %s %d %d %f", mode, integration, action, value)
+                    _LOGGER.debug("Got DEVICE value: %s %d %d %f", mode,
+                                  integration, action, value)
                     state = 1 << action - device.minbutton
                     if value == Caseta.Button.PRESS:
                         _LOGGER.debug("Got Button Press, updating value")
@@ -82,6 +91,8 @@ class CasetaData:
                     break
 
 
+# pylint: disable=unused-argument
+@asyncio.coroutine
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Setup the platform."""
     if discovery_info is None:
@@ -116,13 +127,14 @@ class CasetaPicoRemote(Entity):
         self._integration = int(pico[CONF_ID])
         self._buttons = pico[CONF_BUTTONS]
         self._minbutton = 100
-        for b in self._buttons:
-            if b < self._minbutton:
-                self._minbutton = b
+        for button_num in self._buttons:
+            if button_num < self._minbutton:
+                self._minbutton = button_num
         self._state = 0
 
     @property
     def integration(self):
+        """Return the Integration ID."""
         return self._integration
 
     @property
@@ -140,6 +152,7 @@ class CasetaPicoRemote(Entity):
 
     @property
     def minbutton(self):
+        """Return the lowest number button for this keypad."""
         return self._minbutton
 
     @property

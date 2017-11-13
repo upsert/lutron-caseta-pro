@@ -4,14 +4,14 @@ Platform for Lutron Caseta switches.
 Author: upsert (https://github.com/upsert)
 Based on work by jhanssen (https://github.com/jhanssen/home-assistant/tree/caseta-0.40)
 """
+import asyncio
+import logging
+
 from homeassistant.components.switch import SwitchDevice
 from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_NAME, CONF_ID)
 
 # pylint: disable=relative-beyond-top-level
 from ..lutron_caseta_pro import (Caseta, ATTR_AREA_NAME, CONF_AREA_NAME, ATTR_INTEGRATION_ID)
-
-import asyncio
-import logging
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,28 +27,34 @@ class CasetaData:
 
     @property
     def devices(self):
+        """Return the device list."""
         return self._devices
 
     @property
     def caseta(self):
+        """Return a reference to Casetify instance."""
         return self._caseta
 
     def set_devices(self, devices):
+        """Set the device list."""
         self._devices = devices
 
     @asyncio.coroutine
     def read_output(self, mode, integration, action, value):
-        # find integration in devices
+        """Receive output value from the bridge."""
+        # find integration ID in devices
         if mode == Caseta.OUTPUT:
-            _LOGGER.debug("Got switch OUTPUT value: %s %d %d %f", mode, integration, action, value)
             for device in self._devices:
                 if device.integration == integration:
+                    _LOGGER.debug("Got switch OUTPUT value: %s %d %d %f",
+                                  mode, integration, action, value)
                     if action == Caseta.Action.SET:
                         device.update_state(value)
                         yield from device.async_update_ha_state()
                         break
 
 
+# pylint: disable=unused-argument
 @asyncio.coroutine
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Setup the platform."""
@@ -89,10 +95,12 @@ class CasetaSwitch(SwitchDevice):
 
     @asyncio.coroutine
     def query(self):
+        """Query the bridge for the current level."""
         yield from self._data.caseta.query(Caseta.OUTPUT, self._integration, Caseta.Action.SET)
 
     @property
     def integration(self):
+        """Return the Integration ID."""
         return self._integration
 
     @property

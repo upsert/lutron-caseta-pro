@@ -7,8 +7,8 @@ Based on work by jhanssen (https://github.com/jhanssen/home-assistant/tree/caset
 import asyncio
 import logging
 
-from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_NAME, CONF_ID)
 from homeassistant.components.scene import Scene
+from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_NAME, CONF_ID)
 
 # pylint: disable=relative-beyond-top-level
 from ..lutron_caseta_pro import (Caseta, ATTR_SCENE_ID, CONF_SCENE_ID)
@@ -20,6 +20,7 @@ DEPENDENCIES = ['lutron_caseta_pro']
 
 class CasetaData:
     """Data holder for a scene."""
+
     def __init__(self, caseta, hass):
         self._caseta = caseta
         self._hass = hass
@@ -43,13 +44,15 @@ class CasetaData:
 
     @asyncio.coroutine
     def read_output(self, mode, integration, component, action):
+        """Receive output value from the bridge."""
         # only monitor integration ID 1 for scenes
         if mode == Caseta.DEVICE and integration == 1:
             # Expecting: ~DEVICE,1,Component Number,Action Number
-            _LOGGER.debug("Got DEVICE value: %s %d %d %d", mode, integration, component, action)
+            _LOGGER.debug("Got scene DEVICE value: %s %d %d %d",
+                          mode, integration, component, action)
             for device in self._devices:
                 if device.scene_id == component and action == Caseta.Button.PRESS:
-                    _LOGGER.info("Scene {} activated.".format(component))
+                    _LOGGER.info("Scene %s activated.", component)
                     # nothing to update in Home Assistant for scenes
                     break
 
