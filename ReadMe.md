@@ -94,7 +94,7 @@ Enable debugging in your main configuration.yaml to see more logging:
 logger:
   default: info
   logs:
-    custom_components.lutron_caseta_pro: debug
+    custom_components: debug
 ```
 
 If connection errors are evident, try connecting to the IP listed in the configuration using a Telnet client such as [PuTTY](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html). A connection refused or timeout error indicates the wrong IP address has been used or the Telnet Support has not been enabled in the mobile app under Settings -> Advanced -> Integration.
