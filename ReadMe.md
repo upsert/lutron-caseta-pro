@@ -81,6 +81,11 @@ The Integration Report must be updated after any change to device configuration 
 
 To update the custom component, copy the latest files into `custom_components` directory and overwrite existing files. If you have no other custom components, you can remove the contents of the directory before copying the files.
 
+## Pico Remote Sensors
+All Pico remotes and wall keypads in the system will each get their own `sensor` in Home Assistant.
+
+The sensor's value will change when a button is pressed according to this [button map](button_map.md).
+
 ## Troubleshooting
 
 Enable debugging in your main configuration.yaml to see more logging:
