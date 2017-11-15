@@ -22,6 +22,7 @@ class CasetaData:
     """Data holder for a switch."""
 
     def __init__(self, caseta):
+        """Initialize the data holder."""
         self._caseta = caseta
         self._devices = []
 
@@ -57,7 +58,7 @@ class CasetaData:
 # pylint: disable=unused-argument
 @asyncio.coroutine
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
-    """Setup the platform."""
+    """Initialize the platform."""
     if discovery_info is None:
         return
     bridge = Caseta(discovery_info[CONF_HOST])
@@ -124,13 +125,14 @@ class CasetaSwitch(SwitchDevice):
     @asyncio.coroutine
     def async_turn_on(self, **kwargs):
         """Instruct the switch to turn on."""
-        _LOGGER.debug("Writing switch OUTPUT value: %d %d on", self._integration, Caseta.Action.SET)
+        _LOGGER.debug("Writing switch OUTPUT value: %d %d 100",
+                      self._integration, Caseta.Action.SET)
         yield from self._data.caseta.write(Caseta.OUTPUT, self._integration, Caseta.Action.SET, 100)
 
     @asyncio.coroutine
     def async_turn_off(self, **kwargs):
-        """Instruct the swtich to turn off."""
-        _LOGGER.debug("Writing caseta value: %d %d off", self._integration, Caseta.Action.SET)
+        """Instruct the switch to turn off."""
+        _LOGGER.debug("Writing switch OUTPUT value: %d %d 0", self._integration, Caseta.Action.SET)
         yield from self._data.caseta.write(Caseta.OUTPUT, self._integration, Caseta.Action.SET, 0)
 
     def update_state(self, value):

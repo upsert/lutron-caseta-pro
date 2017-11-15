@@ -20,6 +20,9 @@ from ..lutron_caseta_pro import (Caseta, DEFAULT_TYPE, ATTR_AREA_NAME, CONF_AREA
 
 _LOGGER = logging.getLogger(__name__)
 
+# Max transition time supported is 4 hours
+_MAX_TRANSITION = 14400
+
 DEPENDENCIES = ['lutron_caseta_pro']
 
 
@@ -27,6 +30,7 @@ class CasetaData:
     """Data holder for a light."""
 
     def __init__(self, caseta):
+        """Initialize the data holder."""
         self._caseta = caseta
         self._devices = []
 
@@ -62,7 +66,7 @@ class CasetaData:
 # pylint: disable=unused-argument
 @asyncio.coroutine
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
-    """Setup the platform."""
+    """Initialize the platform."""
     if discovery_info is None:
         return
     bridge = Caseta(discovery_info[CONF_HOST])
@@ -81,6 +85,26 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     bridge.start(hass)
 
     return True
+
+
+def _format_transition(transition) -> str:
+    """Format a string for transition given as a float."""
+    if transition is None:
+        return transition
+
+    if transition > _MAX_TRANSITION:
+        _LOGGER.warning("Transition exceeded maximum of 4 hours. "
+                        "4 hours will be used instead.")
+        transition = _MAX_TRANSITION
+    if transition < 60:
+        # format to two decimals for less than 60 seconds
+        transition = "{:0>.2f}".format(transition)
+    else:
+        # else format HH:MM:SS
+        minutes, seconds = divmod(transition, 60)
+        hours, minutes = divmod(minutes, 60)
+        transition = "{:0>2d}:{:0>2d}:{:0>2d}".format(int(hours), int(minutes), int(seconds))
+    return transition
 
 
 class CasetaLight(Light):
@@ -138,28 +162,30 @@ class CasetaLight(Light):
         """Flag supported features."""
         return (SUPPORT_BRIGHTNESS | SUPPORT_TRANSITION) if self._is_dimmer else 0
 
+    @asyncio.coroutine
     def async_turn_on(self, **kwargs):
         """Instruct the light to turn on."""
         value = 100
         transition = None
         if self._is_dimmer:
             if ATTR_BRIGHTNESS in kwargs:
-                value = (kwargs[ATTR_BRIGHTNESS] / 255) * 100
+                value = "{:0>.2f}".format((kwargs[ATTR_BRIGHTNESS] / 255) * 100)
             if ATTR_TRANSITION in kwargs:
-                transition = ":" + str(kwargs[ATTR_TRANSITION])
-        _LOGGER.debug("Writing light OUTPUT value: %d %d %f %s",
+                transition = _format_transition(float(kwargs[ATTR_TRANSITION]))
+        _LOGGER.debug("Writing light OUTPUT value: %d %d %s %s",
                       self._integration, Caseta.Action.SET, value,
-                      str(transition))
+                      transition)
         yield from self._data.caseta.write(Caseta.OUTPUT, self._integration,
                                            Caseta.Action.SET, value, transition)
 
+    @asyncio.coroutine
     def async_turn_off(self, **kwargs):
         """Instruct the light to turn off."""
         transition = None
         if self._is_dimmer:
             if ATTR_TRANSITION in kwargs:
-                transition = ":" + str(kwargs[ATTR_TRANSITION])
-        _LOGGER.debug("Writing light OUTPUT value: %d %d off %s",
+                transition = _format_transition(float(kwargs[ATTR_TRANSITION]))
+        _LOGGER.debug("Writing light OUTPUT value: %d %d 0 %s",
                       self._integration, Caseta.Action.SET, str(transition))
         yield from self._data.caseta.write(Caseta.OUTPUT, self._integration, Caseta.Action.SET, 0,
                                            transition)
