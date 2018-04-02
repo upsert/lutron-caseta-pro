@@ -115,7 +115,7 @@ class CasetaCover(CoverDevice):
 
     @property
     def name(self):
-        """Return the display name of this pico."""
+        """Return the display name of this device."""
         return self._name
 
     @property

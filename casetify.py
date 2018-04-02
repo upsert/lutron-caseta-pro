@@ -1,8 +1,9 @@
 """
-Interface module for Lutron Caseta Smart Bridge PRO.
+Interface module for Lutron Caseta Smart Bridge PRO
+and Ra2 Select Main Repeater.
 
 This module uses the Telnet interface which must be
-enabled on the Smart Bridge PRO.
+enabled through the integration menu in the mobile app.
 
 Original Author: jhanssen
 Source: https://github.com/jhanssen/home-assistant/tree/caseta-0.40
@@ -95,7 +96,7 @@ def _process_scenes(devices, device):
 
 # pylint: disable=too-many-instance-attributes
 class Casetify:
-    """Async class to communicate with Lutron Caseta Smart Bridge PRO."""
+    """Async class to communicate with Lutron bridge."""
 
     loop = asyncio.get_event_loop()
 
@@ -142,7 +143,7 @@ class Casetify:
     @asyncio.coroutine
     def open(self, host, port=23, username=DEFAULT_USER,
              password=DEFAULT_PASSWORD):
-        """Open a Telnet connection to Smart Bridge PRO."""
+        """Open a Telnet connection to Lutron bridge."""
         with (yield from self._read_lock):
             with (yield from self._write_lock):
                 if self._state != Casetify.State.Closed:
@@ -159,7 +160,7 @@ class Casetify:
                     connection = yield from asyncio.open_connection(host, port,
                                                                     loop=Casetify.loop)
                 except OSError as err:
-                    _LOGGER.warning("Error opening connection to Lutron Bridge: %s", err)
+                    _LOGGER.warning("Error opening connection to Lutron bridge: %s", err)
                     self._state = Casetify.State.Closed
                     return
 
@@ -193,7 +194,7 @@ class Casetify:
             try:
                 self._read_buffer += yield from self.reader.read(READ_SIZE)
             except OSError as err:
-                _LOGGER.warning("Error reading from Lutron Smart Bridge: %s", err)
+                _LOGGER.warning("Error reading from Lutron bridge: %s", err)
                 return False
 
     @asyncio.coroutine
@@ -214,7 +215,7 @@ class Casetify:
                     print("Exception in ", match.group(0))
         if match is False:
             # attempt to reconnect
-            _LOGGER.info("Reconnecting to caseta bridge %s", self._host)
+            _LOGGER.info("Reconnecting to Lutron bridge %s", self._host)
             self._state = Casetify.State.Closed
             yield from self.open(self._host, self._port, self._username,
                                  self._password)
@@ -237,7 +238,7 @@ class Casetify:
             try:
                 self.writer.write((data + "\r\n").encode())
             except OSError as err:
-                _LOGGER.warning("Error writing out to the Lutron Bridge: %s", err)
+                _LOGGER.warning("Error writing out to the Lutron bridge: %s", err)
 
     @asyncio.coroutine
     def query(self, mode, integration, action):

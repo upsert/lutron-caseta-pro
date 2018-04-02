@@ -1,5 +1,5 @@
 """
-Platform for Lutron Caseta lights.
+Platform for Lutron dimmers for lights.
 
 Original Author: jhanssen
 Source: https://github.com/jhanssen/home-assistant/tree/caseta-0.40
@@ -108,10 +108,10 @@ def _format_transition(transition) -> str:
 
 
 class CasetaLight(Light):
-    """Representation of a Caseta Light."""
+    """Representation of a Lutron light."""
 
     def __init__(self, light, data):
-        """Initialize a Caseta Light."""
+        """Initialize a Lutron light."""
         self._data = data
         self._name = light[CONF_NAME]
         self._area_name = None

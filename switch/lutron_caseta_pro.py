@@ -1,5 +1,5 @@
 """
-Platform for Lutron Caseta switches.
+Platform for Lutron switches.
 
 Author: upsert (https://github.com/upsert)
 Based on work by jhanssen (https://github.com/jhanssen/home-assistant/tree/caseta-0.40)
@@ -80,10 +80,10 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 
 
 class CasetaSwitch(SwitchDevice):
-    """Representation of a Caseta Switch."""
+    """Representation of a Lutron switch."""
 
     def __init__(self, switch, data):
-        """Initialize a Caseta Switch."""
+        """Initialize a Lutron switch."""
         self._data = data
         self._name = switch[CONF_NAME]
         self._area_name = None

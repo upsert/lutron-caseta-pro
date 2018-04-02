@@ -1,5 +1,5 @@
 """
-Platform for Lutron Caseta scenes.
+Platform for Lutron scenes.
 
 Author: upsert (https://github.com/upsert)
 Based on work by jhanssen (https://github.com/jhanssen/home-assistant/tree/caseta-0.40)
@@ -79,10 +79,10 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 
 
 class CasetaScene(Scene):
-    """Representation of a Caseta scene."""
+    """Representation of a Lutron scene."""
 
     def __init__(self, scene, data):
-        """Initialize a Caseta scene."""
+        """Initialize a Lutron scene."""
         self._data = data
         self._name = scene[CONF_NAME]
         self._integration = int(scene[CONF_ID])
@@ -100,7 +100,7 @@ class CasetaScene(Scene):
 
     @property
     def name(self):
-        """Return the display name of this pico."""
+        """Return the display name of this scene."""
         return self._name
 
     @property

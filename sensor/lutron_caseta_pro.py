@@ -1,5 +1,6 @@
 """
-Platform for Lutron Caseta sensor representing a button press from a remote.
+Platform for Lutron sensor representing a button press from a Pico
+wireless remote.
 
 Original Author: jhanssen
 Source: https://github.com/jhanssen/home-assistant/tree/caseta-0.40
@@ -113,10 +114,10 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 
 
 class CasetaPicoRemote(Entity):
-    """Representation of a Caseta Pico remote."""
+    """Representation of a Lutron Pico remote."""
 
     def __init__(self, pico, data):
-        """Initialize a Caseta Pico."""
+        """Initialize a Lutron Pico."""
         self._data = data
         self._name = pico[CONF_NAME]
         self._area_name = None
@@ -139,7 +140,7 @@ class CasetaPicoRemote(Entity):
 
     @property
     def name(self):
-        """Return the display name of this pico."""
+        """Return the display name of this Pico."""
         return self._name
 
     @property
@@ -157,7 +158,7 @@ class CasetaPicoRemote(Entity):
 
     @property
     def state(self):
-        """State of the pico device."""
+        """State of the Pico device."""
         return self._state
 
     def update_state(self, state):

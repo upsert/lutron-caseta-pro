@@ -1,5 +1,5 @@
 """
-Lutron Caseta Smart Bridge PRO Home Assistant Component.
+Lutron Caseta Smart Bridge PRO and Ra2 Select Home Assistant Component.
 
 Original Author: jhanssen
 Source: https://github.com/jhanssen/home-assistant/tree/caseta-0.40
@@ -61,7 +61,7 @@ def request_configuration(hass, config, host, bridge):
 
     if host in _CONFIGURING:
         configurator.notify_errors(_CONFIGURING[host],
-                                   "Failed to process Lutron Caseta Integration"
+                                   "Failed to process Lutron Integration"
                                    " Report, please try again.")
         return
 
@@ -72,7 +72,7 @@ def request_configuration(hass, config, host, bridge):
         integration_report_data = data.get('integration_report')
         if not integration_report_data:
             configurator.notify_errors(request_id,
-                                       "Error reading the integration report. Please try again.")
+                                       "Error reading the Integration Report. Please try again.")
             return False
 
         # parse JSON integration report
@@ -103,7 +103,7 @@ def request_configuration(hass, config, host, bridge):
     _LOGGER.info("Requesting config from user for host %s", host)
 
     request_id = configurator.async_request_config(
-        name="Lutron Caseta Smart Bridge PRO",
+        name="Lutron Caseta Smart Bridge PRO / Ra2 Select",
         callback=setup_callback,
         description="Enter the contents of the Integration Report:",
         fields=[{'id': 'integration_report', 'name': 'Integration Report', 'type': 'string'}],
@@ -141,7 +141,7 @@ def async_setup(hass, config):
 @asyncio.coroutine
 def async_setup_bridge(hass, config, fname, bridge):
     """Initialize a bridge by loading its integration report."""
-    _LOGGER.debug("Setting up bridge using integration report %s", fname)
+    _LOGGER.debug("Setting up bridge using Integration Report %s", fname)
 
     devices = yield from casetify.async_load_integration_report(fname)
 
@@ -217,7 +217,7 @@ class Caseta:
             pass
 
     class CasetaBridge:
-        """Inner class for handling Caseta bridge communication."""
+        """Inner class for handling Lutron bridge communication."""
 
         host_list = {}
 
@@ -234,7 +234,7 @@ class Caseta:
 
         @asyncio.coroutine
         def _read_next(self):
-            """Read and process a value from the Caseta interface."""
+            """Read and process a value from the Lutron interface."""
             read_response = yield from self._casetify.read()
             mode = read_response[0]
             integration = read_response[1]
@@ -253,13 +253,13 @@ class Caseta:
 
         @asyncio.coroutine
         def _reconnect(self):
-            """Attempt to re-connect to the Lutron Smart Bridge."""
+            """Attempt to re-connect to the Lutron bridge."""
             if not self._casetify.is_connected():
                 yield from self._casetify.open(self._host)
                 if not self._casetify.is_connected():
                     _LOGGER.debug("Waiting to reconnect.")
                 else:
-                    _LOGGER.debug("Re-connected to the bridge.")
+                    _LOGGER.debug("Re-connected to the Lutron bridge.")
                     # TODO update state for all devices
 
         @asyncio.coroutine
@@ -270,14 +270,14 @@ class Caseta:
 
             # check the connection, reconnect if needed
             if not self._casetify.is_connected():
-                _LOGGER.debug("Lutron Bridge not connected. Scheduling a reconnect attempt.")
+                _LOGGER.debug("Lutron bridge not connected. Scheduling a reconnect attempt.")
                 self._hass.loop.create_task(self._reconnect())
 
             self._hass.loop.create_task(self._ping())
 
         @asyncio.coroutine
         def open(self):
-            """Open a connection to the Caseta bridge."""
+            """Open a connection to the Lutron bridge."""
             if self._casetify is not None:
                 # connection already open
                 return True
@@ -288,7 +288,7 @@ class Caseta:
 
         @asyncio.coroutine
         def write(self, mode, integration, action, value, *args):
-            """Write a value to the Caseta bridge."""
+            """Write a value to the Lutron bridge."""
             if self._casetify is None:
                 return False
             yield from self._casetify.write(mode, integration, action, value, *args)
@@ -296,7 +296,7 @@ class Caseta:
 
         @asyncio.coroutine
         def query(self, mode, integration, action):
-            """Query a device value from the Caseta bridge."""
+            """Query a device value from the Lutron bridge."""
             if self._casetify is None:
                 return False
             yield from self._casetify.query(mode, integration, action)
@@ -309,7 +309,7 @@ class Caseta:
         def start(self, hass):
             """Start the bridge running loop."""
             if self._hass is None:
-                _LOGGER.debug("Starting Caseta for host %s", self._host)
+                _LOGGER.debug("Starting Lutron component for host %s", self._host)
                 self._hass = hass
                 hass.loop.create_task(self._read_next())
                 hass.loop.create_task(self._ping())
