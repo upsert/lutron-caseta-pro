@@ -235,14 +235,12 @@ class Caseta:
         @asyncio.coroutine
         def _read_next(self):
             """Read and process a value from the Caseta interface."""
-            _LOGGER.debug("Reading Caseta for host %s", self._host)
             read_response = yield from self._casetify.read()
             mode = read_response[0]
             integration = read_response[1]
             action = read_response[2]
             value = read_response[3]
             if mode is None:
-                _LOGGER.debug("Read no values from Caseta")
                 self._hass.loop.create_task(self._read_next())
                 return
             _LOGGER.debug("Read value for host %s: %s %d %d %f",
@@ -254,10 +252,27 @@ class Caseta:
             self._hass.loop.create_task(self._read_next())
 
         @asyncio.coroutine
+        def _reconnect(self):
+            """Attempt to re-connect to the Lutron Smart Bridge."""
+            if not self._casetify.is_connected():
+                yield from self._casetify.open(self._host)
+                if not self._casetify.is_connected():
+                    _LOGGER.debug("Waiting to reconnect.")
+                else:
+                    _LOGGER.debug("Re-connected to the bridge.")
+                    # TODO update state for all devices
+
+        @asyncio.coroutine
         def _ping(self):
             """Send a ping to the Caseta interface."""
             yield from asyncio.sleep(60)
             yield from self._casetify.ping()
+
+            # check the connection, reconnect if needed
+            if not self._casetify.is_connected():
+                _LOGGER.debug("Lutron Bridge not connected. Scheduling a reconnect attempt.")
+                self._hass.loop.create_task(self._reconnect())
+
             self._hass.loop.create_task(self._ping())
 
         @asyncio.coroutine
@@ -266,7 +281,7 @@ class Caseta:
             if self._casetify is not None:
                 # connection already open
                 return True
-            _LOGGER.info("Opened connection to host %s", self._host)
+            _LOGGER.info("Opening connection to host %s", self._host)
             self._casetify = casetify.Casetify()
             yield from self._casetify.open(self._host)
             return True

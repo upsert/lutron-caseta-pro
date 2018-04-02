@@ -135,6 +135,10 @@ class Casetify:
         self._password = DEFAULT_PASSWORD
         self.reader, self.writer = None, None
 
+    def is_connected(self):
+        """Returns if the connection is open."""
+        return self._state == Casetify.State.Opened
+
     @asyncio.coroutine
     def open(self, host, port=23, username=DEFAULT_USER,
              password=DEFAULT_PASSWORD):
@@ -151,8 +155,14 @@ class Casetify:
                 self._password = password
 
                 # open connection
-                connection = yield from asyncio.open_connection(host, port,
-                                                                loop=Casetify.loop)
+                try:
+                    connection = yield from asyncio.open_connection(host, port,
+                                                                    loop=Casetify.loop)
+                except OSError as err:
+                    _LOGGER.warning("Error opening connection to Lutron Bridge: %s", err)
+                    self._state = Casetify.State.Closed
+                    return
+
                 self.reader = connection[0]
                 self.writer = connection[1]
 
@@ -182,7 +192,8 @@ class Casetify:
                     return True
             try:
                 self._read_buffer += yield from self.reader.read(READ_SIZE)
-            except ConnectionResetError:
+            except OSError as err:
+                _LOGGER.warning("Error reading from Lutron Smart Bridge: %s", err)
                 return False
 
     @asyncio.coroutine
@@ -223,7 +234,10 @@ class Casetify:
             for arg in args:
                 if arg is not None:
                     data += ",{}".format(arg)
-            self.writer.write((data + "\r\n").encode())
+            try:
+                self.writer.write((data + "\r\n").encode())
+            except OSError as err:
+                _LOGGER.warning("Error writing out to the Lutron Bridge: %s", err)
 
     @asyncio.coroutine
     def query(self, mode, integration, action):
