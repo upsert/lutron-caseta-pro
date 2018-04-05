@@ -2,7 +2,13 @@
 
 [Lutron](http://www.lutron.com/) is an American lighting control company. They have several lines of home automation devices that manage light switches, dimmers, occupancy sensors, HVAC controls, etc.
 
-This is a custom [Home Assistant](https://home-assistant.io/) component to support the **PRO** model of the [Lutron Caseta](http://www.casetawireless.com) Smart Bridge and the [Ra2 Select Main Repeater](http://www.lutron.com/en-US/Products/Pages/WholeHomeSystems/RA2Select/Overview.aspx) and their respective product lines. The Smart Bridge PRO (L-BDGPRO2-WH) and Ra2 Select (RR-SEL-REP2-BL) models are supported through their Telnet integration interface. This is only available on the PRO model for Caseta. No other interfaces to the Smart Bridge or Main Repeater are used by this component and the JSON format Integration Report is required to operate.
+This is a custom [Home Assistant](https://home-assistant.io/) component to support the following models of Lutron bridges / main repeaters:
+
+- [Lutron Caseta](http://www.casetawireless.com) Smart Bridge **PRO** (L-BDGPRO2-WH)
+- [Ra2 Select](http://www.lutron.com/en-US/Products/Pages/WholeHomeSystems/RA2Select/Overview.aspx) Main Repeater (RR-SEL-REP-BL)
+- [Ra2 Select](http://www.lutron.com/en-US/Products/Pages/WholeHomeSystems/RA2Select/Overview.aspx) Main Repeater for SnapAV (RR-SEL-REP2S-BL)
+
+The bridges / main repeaters are supported through their Telnet integration interface which must be enabled for this component to function. The non-PRO model of the Caseta bridge is not supported. No other interfaces to the Smart Bridge or Main Repeater are used by this component.
 
 The currently supported Lutron devices are:
 
@@ -29,12 +35,19 @@ It should look similar to this after installation:
 /custom_components/light/
  ... etc...
 ```
-3. Edit `configuration.yaml` (see below) and restart Home Assistant.
+3. Proceed with first time setup.
 
-## Component Setup
+## First Time Setup
+1. Setup the Lutron app and add all your Lutron devices through the app. Enable Telnet Support under settings menu -> Advanced -> Integration. Also enable static IP under Network Settings and write down the IP.
+1. In your Home Assistant installation, install the custom component by copying in the files as noted in the instructions.
+1. In Home Assistant `configuration.yaml` create a minimal configuration for the custom component (see below) using the IP address you wrote down and start Home Assistant.
+1. Once started and assuming first time setup, open Home Assistant on your mobile device and you should see a prompt to Configure Lutron Caseta Smart Bridge PRO on the front-end. Click on Configure and you’ll see a box to paste your Integration Report.
+1. Switch over to the Lutron app, go to settings -> Advanced -> Integration -> Send Integration Report. When prompted, select ‘Copy to clipboard’.
+1. Switch back to Home Assistant front-end and paste in the Integration Report. If your phone does not have copy and paste options, you will need to share it to yourself through email or to another app that supports copy paste.
+1. Once you submit the Integration Report the component should setup all your devices as dimmers and will save the Integration Report to your config directory as a JSON file.
+1. If you have switches or Lutron shades, open the Integration Report in your config directory using a text editor and find their Integration IDs and edit your Home Assistant configuration as described in the instructions below to tell it which devices are switches or shades. Unfortunately, the Integration Report does not contain this information so you need to do this manually if you have switches or shades. Restart Home Assistant if you change the yaml file.
 
-1. Enable Telnet Support in the Lutron mobile app under Settings -> Advanced -> Integration. It is also recommended to set a static IP address under Integration -> Network Settings.
-1. Enable the component in your Home Assistant `configuration.yaml` using the configuration described below. When the component loads it will look for an Integration Report in the configuration directory of Home Assistant. The file name must be in the format `lutron_caseta_pro_<bridge ip address>.json`, where `<bridge ip address>` is the IP address of the Smart Bridge PRO. If it cannot find the Integration Report, it will use Configurator to prompt the user to enter it on the frontend. This allows the use of copying and pasting on a mobile device between the Lutron mobile app and Home Assistant frontend.
+After first-time configuration, the JSON-format Integration Report will be saved to your Home Assistant configuration directory as `lutron_caseta_pro_<bridge ip address>.json`, where `<bridge ip address>` is the IP address of the Bridge / Main Repeater. If it cannot find the Integration Report, it will use Configurator to prompt the user to enter it on the frontend.
 
 When configured, the `lutron_caseta_pro` component will load the Integration Report and setup **all the zones as dimmable lights unless configured otherwise** (see below).
 
@@ -51,6 +64,8 @@ lutron_caseta_pro:
       - host: IP_ADDRESS
 ```
 
+Where `IP_ADDRESS` is the IP address of your Bridge / Main Repeater.
+
 Configuration variables:
 
 - **bridges** (*Required*): Must be a **list** of smart bridges. Even if you only have one bridge, use `- host` to start the list.
@@ -66,26 +81,47 @@ Additional configuration is provided to set the device types according to the In
 lutron_caseta_pro:
     bridges:
       - host: IP_ADDRESS
+        # Note: Configure only switches and shades, all others will be dimmers
         switch: [ 4, 5 ]
         cover: [ 11, 12 ]
 ```
 
 Configuration variables:
 
-- **switch** (*Optional*): Array of integration IDs ("ID" in the "Zones" section of integration report)
-- **cover** (*Optional*): Array of integration IDs ("ID" in the "Zones" section of integration report)
+- **switch** (*Optional*): Array of integration IDs ("ID" in the "Zones" section of Integration Report)
+- **cover** (*Optional*): Array of integration IDs ("ID" in the "Zones" section of Integration Report)
 
-In the above example Zone 4 and 5 are configured as switches (e.g. `switch.<device name>` in Home Assistant) and zones 11 and 12 are shades (e.g. `cover.<device name>` in Home Assistant). If a listed ID is not found in the Integration Report, it will be ignored.
+In the above example Zone 4 and 5 are configured as switches (e.g. `switch.<device name>` in Home Assistant) and Zones 11 and 12 are shades (e.g. `cover.<device name>` in Home Assistant). If a listed ID is not found in the Integration Report, it will be ignored.
 
 ## Updating
 The Integration Report must be updated after any change to device configuration such as pairing new devices or scene renaming. For scenes, only adding or removing a scene or changing a scene's name will modify the Integration Report and changing light or shade levels will not affect it.
 
+To update the Integration Report, delete the JSON Integration Report from your Home Assistant configuration directory, restart Home Assistant and follow the procedure above for first time setup.
+
 To update the custom component, copy the latest files into `custom_components` directory and overwrite existing files. If you have no other custom components, you can remove the contents of the directory before copying the files.
 
 ## Pico Remote Sensors
-All Pico remotes and wall keypads in the system will each get their own `sensor` in Home Assistant.
+All Pico remotes in the system will each get their own `sensor` in Home Assistant.
 
 The sensor's value will change when a button is pressed according to this [button map](button_map.md).
+
+### Example Automation for a Pico Button
+
+```yaml
+- alias: Media Pico Button 1
+  id: '1522884919017'
+  action:
+  - alias: Turn on Watch TV
+    service: remote.turn_on
+    data:
+      activity: '29535421'
+      entity_id: remote.living_room_harmony
+  condition: []
+  trigger:
+  - platform: state
+    entity_id: sensor.media_pico
+    to: '1'
+```
 
 ## Troubleshooting
 
@@ -106,4 +142,5 @@ If connection errors are evident, try connecting to the IP listed in the configu
 
 ## Credits
 
-* Based on a [branch](https://github.com/jhanssen/home-assistant/tree/caseta-0.40) of home-assistant authored by [jhanssen](https://github.com/jhanssen/)
+* Based on a [branch](https://github.com/jhanssen/home-assistant/tree/caseta-0.40) of [home-assistant](https://github.com/home-assistant/home-assistant) authored by [jhanssen](https://github.com/jhanssen/)
+* Feedback and improvements suggested by the [Home Assistant Community](https://community.home-assistant.io/)
