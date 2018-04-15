@@ -11,12 +11,14 @@ upsert (https://github.com/upsert)
 import asyncio
 import logging
 
-from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_NAME, CONF_ID)
+from homeassistant.components.sensor import DOMAIN
+from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID)
 from homeassistant.helpers.entity import Entity
 
 # pylint: disable=relative-beyond-top-level
 from ..lutron_caseta_pro import (Caseta, CONF_BUTTONS, ATTR_AREA_NAME,
-                                 CONF_AREA_NAME, ATTR_INTEGRATION_ID)
+                                 CONF_AREA_NAME, ATTR_INTEGRATION_ID,
+                                 DOMAIN as COMPONENT_DOMAIN)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -102,7 +104,7 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     yield from bridge.open()
 
     data = CasetaData(bridge, hass)
-    devices = [CasetaPicoRemote(pico, data) for pico in discovery_info[CONF_DEVICES]]
+    devices = [CasetaPicoRemote(pico, data, discovery_info[CONF_MAC]) for pico in discovery_info[CONF_DEVICES]]
     data.set_devices(devices)
 
     async_add_devices(devices)
@@ -116,7 +118,7 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 class CasetaPicoRemote(Entity):
     """Representation of a Lutron Pico remote."""
 
-    def __init__(self, pico, data):
+    def __init__(self, pico, data, mac):
         """Initialize a Lutron Pico."""
         self._data = data
         self._name = pico[CONF_NAME]
@@ -132,11 +134,22 @@ class CasetaPicoRemote(Entity):
             if button_num < self._minbutton:
                 self._minbutton = button_num
         self._state = 0
+        self._mac = mac
 
     @property
     def integration(self):
         """Return the Integration ID."""
         return self._integration
+
+    @property
+    def unique_id(self) -> str:
+        """Return a unique ID."""
+        if self._mac is not None:
+            return "{}_{}_{}_{}".format(COMPONENT_DOMAIN,
+                                        DOMAIN, self._mac,
+                                        self._integration)
+        else:
+            return None
 
     @property
     def name(self):

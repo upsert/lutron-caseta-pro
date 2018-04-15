@@ -15,7 +15,7 @@ import os.path
 import weakref
 
 import voluptuous as vol
-from homeassistant.const import (CONF_ID, CONF_DEVICES, CONF_HOST, CONF_TYPE)
+from homeassistant.const import (CONF_ID, CONF_DEVICES, CONF_HOST, CONF_TYPE, CONF_MAC)
 from homeassistant.helpers import discovery
 from homeassistant.helpers.config_validation import ensure_list, string, \
     positive_int
@@ -44,6 +44,7 @@ CONFIG_SCHEMA = vol.Schema({
         vol.Required(CONF_BRIDGES): vol.All(ensure_list, [
             {
                 vol.Required(CONF_HOST): string,
+                vol.Optional(CONF_MAC): string,
                 vol.Optional(CONF_SWITCH): vol.All(ensure_list,
                                                    [positive_int]),
                 vol.Optional(CONF_COVER): vol.All(ensure_list,
@@ -155,6 +156,11 @@ def async_setup_bridge(hass, config, fname, bridge):
     for device in devices:
         types[device["type"]].append(device)
 
+    # load MAC address used for unique IDs
+    mac_address = None
+    if CONF_MAC in bridge:
+        mac_address = bridge[CONF_MAC]
+
     # load platform by type
     for device_type in types:
         component = device_type
@@ -163,6 +169,7 @@ def async_setup_bridge(hass, config, fname, bridge):
             discovery.async_load_platform(
                 hass, component, DOMAIN,
                 {CONF_HOST: bridge[CONF_HOST],
+                 CONF_MAC: mac_address,
                  CONF_DEVICES: types[device_type]}, config))
 
 
