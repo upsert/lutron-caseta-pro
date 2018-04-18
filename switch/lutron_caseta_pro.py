@@ -7,11 +7,12 @@ Based on work by jhanssen (https://github.com/jhanssen/home-assistant/tree/caset
 import asyncio
 import logging
 
-from homeassistant.components.switch import SwitchDevice
-from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_NAME, CONF_ID)
+from homeassistant.components.switch import SwitchDevice, DOMAIN
+from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID)
 
 # pylint: disable=relative-beyond-top-level
-from ..lutron_caseta_pro import (Caseta, ATTR_AREA_NAME, CONF_AREA_NAME, ATTR_INTEGRATION_ID)
+from ..lutron_caseta_pro import (Caseta, ATTR_AREA_NAME, CONF_AREA_NAME, ATTR_INTEGRATION_ID,
+                                 DOMAIN as COMPONENT_DOMAIN)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,7 +66,7 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     yield from bridge.open()
 
     data = CasetaData(bridge)
-    devices = [CasetaSwitch(switch, data) for switch in discovery_info[CONF_DEVICES]]
+    devices = [CasetaSwitch(switch, data, discovery_info[CONF_MAC]) for switch in discovery_info[CONF_DEVICES]]
     data.set_devices(devices)
 
     for device in devices:
@@ -82,7 +83,7 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 class CasetaSwitch(SwitchDevice):
     """Representation of a Lutron switch."""
 
-    def __init__(self, switch, data):
+    def __init__(self, switch, data, mac):
         """Initialize a Lutron switch."""
         self._data = data
         self._name = switch[CONF_NAME]
@@ -93,6 +94,7 @@ class CasetaSwitch(SwitchDevice):
             self._name = switch[CONF_AREA_NAME] + " " + switch[CONF_NAME]
         self._integration = int(switch[CONF_ID])
         self._is_on = False
+        self._mac = mac
 
     @asyncio.coroutine
     def query(self):
@@ -103,6 +105,16 @@ class CasetaSwitch(SwitchDevice):
     def integration(self):
         """Return the Integration ID."""
         return self._integration
+
+    @property
+    def unique_id(self) -> str:
+        """Return a unique ID."""
+        if self._mac is not None:
+            return "{}_{}_{}_{}".format(COMPONENT_DOMAIN,
+                                        DOMAIN, self._mac,
+                                        self._integration)
+        else:
+            return None
 
     @property
     def name(self):

@@ -7,11 +7,11 @@ Based on work by jhanssen (https://github.com/jhanssen/home-assistant/tree/caset
 import asyncio
 import logging
 
-from homeassistant.components.scene import Scene
-from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_NAME, CONF_ID)
+from homeassistant.components.scene import Scene, DOMAIN
+from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID)
 
 # pylint: disable=relative-beyond-top-level
-from ..lutron_caseta_pro import (Caseta, ATTR_SCENE_ID, CONF_SCENE_ID)
+from ..lutron_caseta_pro import (Caseta, ATTR_SCENE_ID, CONF_SCENE_ID, DOMAIN as COMPONENT_DOMAIN)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -67,7 +67,7 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     yield from bridge.open()
 
     data = CasetaData(bridge, hass)
-    devices = [CasetaScene(scene, data) for scene in discovery_info[CONF_DEVICES]]
+    devices = [CasetaScene(scene, data, discovery_info[CONF_MAC]) for scene in discovery_info[CONF_DEVICES]]
     data.set_devices(devices)
 
     async_add_devices(devices)
@@ -81,12 +81,13 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 class CasetaScene(Scene):
     """Representation of a Lutron scene."""
 
-    def __init__(self, scene, data):
+    def __init__(self, scene, data, mac):
         """Initialize a Lutron scene."""
         self._data = data
         self._name = scene[CONF_NAME]
         self._integration = int(scene[CONF_ID])
         self._scene_id = int(scene[CONF_SCENE_ID])
+        self._mac = mac
 
     @property
     def integration(self):
@@ -97,6 +98,17 @@ class CasetaScene(Scene):
     def scene_id(self):
         """Return the scene ID."""
         return self._scene_id
+
+    @property
+    def unique_id(self) -> str:
+        """Return a unique ID."""
+        if self._mac is not None:
+            return "{}_{}_{}_{}_{}".format(COMPONENT_DOMAIN,
+                                        DOMAIN, self._mac,
+                                        self._integration,
+                                        self._scene_id)
+        else:
+            return None
 
     @property
     def name(self):

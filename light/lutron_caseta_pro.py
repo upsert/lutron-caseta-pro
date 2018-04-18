@@ -11,12 +11,12 @@ import asyncio
 import logging
 
 from homeassistant.components.light import (
-    ATTR_BRIGHTNESS, ATTR_TRANSITION, SUPPORT_BRIGHTNESS, SUPPORT_TRANSITION, Light)
-from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_TYPE, CONF_NAME, CONF_ID)
+    ATTR_BRIGHTNESS, ATTR_TRANSITION, SUPPORT_BRIGHTNESS, SUPPORT_TRANSITION, Light, DOMAIN)
+from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_TYPE, CONF_NAME, CONF_ID)
 
 # pylint: disable=relative-beyond-top-level
 from ..lutron_caseta_pro import (Caseta, DEFAULT_TYPE, ATTR_AREA_NAME, CONF_AREA_NAME,
-                                 ATTR_INTEGRATION_ID)
+                                 ATTR_INTEGRATION_ID, DOMAIN as COMPONENT_DOMAIN)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -73,7 +73,7 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     yield from bridge.open()
 
     data = CasetaData(bridge)
-    devices = [CasetaLight(light, data) for light in discovery_info[CONF_DEVICES]]
+    devices = [CasetaLight(light, data, discovery_info[CONF_MAC]) for light in discovery_info[CONF_DEVICES]]
     data.set_devices(devices)
 
     for device in devices:
@@ -110,7 +110,7 @@ def _format_transition(transition) -> str:
 class CasetaLight(Light):
     """Representation of a Lutron light."""
 
-    def __init__(self, light, data):
+    def __init__(self, light, data, mac):
         """Initialize a Lutron light."""
         self._data = data
         self._name = light[CONF_NAME]
@@ -123,6 +123,7 @@ class CasetaLight(Light):
         self._is_dimmer = light[CONF_TYPE] == DEFAULT_TYPE
         self._is_on = False
         self._brightness = 0
+        self._mac = mac
 
     @asyncio.coroutine
     def query(self):
@@ -133,6 +134,16 @@ class CasetaLight(Light):
     def integration(self):
         """Return the Integration ID."""
         return self._integration
+
+    @property
+    def unique_id(self) -> str:
+        """Return a unique ID."""
+        if self._mac is not None:
+            return "{}_{}_{}_{}".format(COMPONENT_DOMAIN,
+                                        DOMAIN, self._mac,
+                                        self._integration)
+        else:
+            return None
 
     @property
     def name(self):

@@ -62,14 +62,24 @@ As a minimum, to use Lutron Caseta devices in your installation, add the followi
 lutron_caseta_pro:
     bridges:
       - host: IP_ADDRESS
+        mac: MAC_ADDRESS
 ```
 
-Where `IP_ADDRESS` is the IP address of your Bridge / Main Repeater.
+Where:
+ 
+- `IP_ADDRESS` is the IP address of your Bridge / Main Repeater (e.g. `192.168.1.100`)
+
+- `MAC_ADDRESS` is the MAC address from the sticker on the bottom
+of your Smart Bridge / Main Repeater (e.g. `a0:f6:fd:12:34:56`).
 
 Configuration variables:
 
 - **bridges** (*Required*): Must be a **list** of smart bridges. Even if you only have one bridge, use `- host` to start the list.
-- **host** (*Required*): The IP address of the Lutron Smart Bridge.
+- **host** (*Required*): The IP address of the Lutron Smart Bridge / Main Repeater.
+- **mac** (*Optional*): The MAC address of the Lutron Smart Bridge / Main Repeater. This is a unique string that is used to
+enable the [Entity Registry](https://www.home-assistant.io/docs/configuration/entity-registry/) feature of Home Assistant.
+It is optional, but **strongly encouraged** for your configuration to allow for
+renaming entities IDs and other customization features in the front-end.
 
 
 ## Configuration with Device Types
@@ -80,7 +90,8 @@ Additional configuration is provided to set the device types according to the In
 # Example configuration.yaml entry with device types
 lutron_caseta_pro:
     bridges:
-      - host: IP_ADDRESS
+      - host: 192.168.1.100
+        mac: a0:f6:fd:12:34:56
         # Note: Configure only switches and shades, all others will be dimmers
         switch: [ 4, 5 ]
         cover: [ 11, 12 ]
