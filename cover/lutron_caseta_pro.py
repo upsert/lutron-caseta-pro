@@ -9,7 +9,7 @@ import logging
 
 from homeassistant.components.cover import (CoverDevice, SUPPORT_OPEN,
                                             SUPPORT_CLOSE, SUPPORT_STOP, ATTR_POSITION,
-                                            DOMAIN)
+                                            SUPPORT_SET_POSITION, DOMAIN)
 from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID)
 
 # pylint: disable=relative-beyond-top-level
@@ -187,7 +187,7 @@ class CasetaCover(CoverDevice):
 
     @property
     def supported_features(self):
-        return SUPPORT_OPEN | SUPPORT_CLOSE | SUPPORT_STOP
+        return SUPPORT_OPEN | SUPPORT_CLOSE | SUPPORT_SET_POSITION
 
     @asyncio.coroutine
     def async_stop_cover(self, **kwargs):
