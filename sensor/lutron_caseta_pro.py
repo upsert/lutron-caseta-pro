@@ -104,7 +104,8 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     yield from bridge.open()
 
     data = CasetaData(bridge, hass)
-    devices = [CasetaPicoRemote(pico, data, discovery_info[CONF_MAC]) for pico in discovery_info[CONF_DEVICES]]
+    devices = [CasetaPicoRemote(pico, data, discovery_info[CONF_MAC])
+               for pico in discovery_info[CONF_DEVICES]]
     data.set_devices(devices)
 
     async_add_devices(devices)
@@ -112,9 +113,8 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     bridge.register(data.read_output)
     bridge.start(hass)
 
-    return True
 
-
+# pylint: disable=too-many-instance-attributes
 class CasetaPicoRemote(Entity):
     """Representation of a Lutron Pico remote."""
 
@@ -148,8 +148,7 @@ class CasetaPicoRemote(Entity):
             return "{}_{}_{}_{}".format(COMPONENT_DOMAIN,
                                         DOMAIN, self._mac,
                                         self._integration)
-        else:
-            return None
+        return None
 
     @property
     def name(self):

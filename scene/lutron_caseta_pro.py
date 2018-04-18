@@ -67,15 +67,14 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     yield from bridge.open()
 
     data = CasetaData(bridge, hass)
-    devices = [CasetaScene(scene, data, discovery_info[CONF_MAC]) for scene in discovery_info[CONF_DEVICES]]
+    devices = [CasetaScene(scene, data, discovery_info[CONF_MAC])
+               for scene in discovery_info[CONF_DEVICES]]
     data.set_devices(devices)
 
     async_add_devices(devices)
 
     bridge.register(data.read_output)
     bridge.start(hass)
-
-    return True
 
 
 class CasetaScene(Scene):
@@ -104,11 +103,10 @@ class CasetaScene(Scene):
         """Return a unique ID."""
         if self._mac is not None:
             return "{}_{}_{}_{}_{}".format(COMPONENT_DOMAIN,
-                                        DOMAIN, self._mac,
-                                        self._integration,
-                                        self._scene_id)
-        else:
-            return None
+                                           DOMAIN, self._mac,
+                                           self._integration,
+                                           self._scene_id)
+        return None
 
     @property
     def name(self):

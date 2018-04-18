@@ -73,7 +73,8 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     yield from bridge.open()
 
     data = CasetaData(bridge)
-    devices = [CasetaLight(light, data, discovery_info[CONF_MAC]) for light in discovery_info[CONF_DEVICES]]
+    devices = [CasetaLight(light, data, discovery_info[CONF_MAC])
+               for light in discovery_info[CONF_DEVICES]]
     data.set_devices(devices)
 
     for device in devices:
@@ -83,8 +84,6 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 
     bridge.register(data.read_output)
     bridge.start(hass)
-
-    return True
 
 
 def _format_transition(transition) -> str:
@@ -107,6 +106,7 @@ def _format_transition(transition) -> str:
     return transition
 
 
+# pylint: disable=too-many-instance-attributes
 class CasetaLight(Light):
     """Representation of a Lutron light."""
 
@@ -142,8 +142,7 @@ class CasetaLight(Light):
             return "{}_{}_{}_{}".format(COMPONENT_DOMAIN,
                                         DOMAIN, self._mac,
                                         self._integration)
-        else:
-            return None
+        return None
 
     @property
     def name(self):

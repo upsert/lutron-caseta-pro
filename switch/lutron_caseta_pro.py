@@ -66,7 +66,8 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     yield from bridge.open()
 
     data = CasetaData(bridge)
-    devices = [CasetaSwitch(switch, data, discovery_info[CONF_MAC]) for switch in discovery_info[CONF_DEVICES]]
+    devices = [CasetaSwitch(switch, data, discovery_info[CONF_MAC])
+               for switch in discovery_info[CONF_DEVICES]]
     data.set_devices(devices)
 
     for device in devices:
@@ -76,8 +77,6 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 
     bridge.register(data.read_output)
     bridge.start(hass)
-
-    return True
 
 
 class CasetaSwitch(SwitchDevice):
@@ -113,8 +112,7 @@ class CasetaSwitch(SwitchDevice):
             return "{}_{}_{}_{}".format(COMPONENT_DOMAIN,
                                         DOMAIN, self._mac,
                                         self._integration)
-        else:
-            return None
+        return None
 
     @property
     def name(self):

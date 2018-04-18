@@ -71,7 +71,8 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     yield from bridge.open()
 
     data = CasetaData(bridge, hass)
-    devices = [CasetaCover(cover, data, discovery_info[CONF_MAC]) for cover in discovery_info[CONF_DEVICES]]
+    devices = [CasetaCover(cover, data, discovery_info[CONF_MAC])
+               for cover in discovery_info[CONF_DEVICES]]
     data.set_devices(devices)
 
     for device in devices:
@@ -81,8 +82,6 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 
     bridge.register(data.read_output)
     bridge.start(hass)
-
-    return True
 
 
 class CasetaCover(CoverDevice):
@@ -123,8 +122,7 @@ class CasetaCover(CoverDevice):
             return "{}_{}_{}_{}".format(COMPONENT_DOMAIN,
                                         DOMAIN, self._mac,
                                         self._integration)
-        else:
-            return None
+        return None
 
     @property
     def name(self):
@@ -187,7 +185,7 @@ class CasetaCover(CoverDevice):
 
     @property
     def supported_features(self):
-        return SUPPORT_OPEN | SUPPORT_CLOSE | SUPPORT_SET_POSITION
+        return SUPPORT_OPEN | SUPPORT_CLOSE | SUPPORT_STOP | SUPPORT_SET_POSITION
 
     @asyncio.coroutine
     def async_stop_cover(self, **kwargs):

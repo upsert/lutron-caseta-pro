@@ -222,7 +222,7 @@ class Casetify:
         return None, None, None, None
 
     @asyncio.coroutine
-    def write(self, mode, integration, action, value=None, *args):
+    def write(self, mode, integration, action, *args, value=None):
         """Write a list of values out to the Telnet interface."""
         if hasattr(action, "value"):
             action = action.value
