@@ -160,7 +160,7 @@ class CasetaLight(Light):
     @property
     def brightness(self):
         """Brightness of the light (an integer in the range 1-255)."""
-        return (self._brightness / 100) * 255
+        return int((self._brightness / 100) * 255)
 
     @property
     def is_on(self):
