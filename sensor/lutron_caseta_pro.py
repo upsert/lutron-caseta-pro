@@ -59,7 +59,8 @@ class CasetaData:
             for device in self._devices:
                 if device.integration == integration:
                     device.update_state(device.state & ~self._added[integration])
-                    yield from device.async_update_ha_state()
+                    if device.hass is not None:
+                        yield from device.async_update_ha_state()
                     _LOGGER.debug("Removed Caseta added %d %d",
                                   integration, self._added[integration])
                     break
@@ -84,13 +85,15 @@ class CasetaData:
                         if self._later is not None:
                             self._later.cancel()
                         self._later = self._hass.loop.create_task(self._check_added())
-                        yield from device.async_update_ha_state()
+                        if device.hass is not None:
+                            yield from device.async_update_ha_state()
                     elif value == Caseta.Button.RELEASE:
                         _LOGGER.debug("Got Button Release, updating value")
                         device.update_state(device.state & ~state)
                         if integration in self._added:
                             self._added[integration] &= ~state
-                        yield from device.async_update_ha_state()
+                        if device.hass is not None:
+                            yield from device.async_update_ha_state()
                     break
 
 
@@ -110,7 +113,10 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 
     async_add_devices(devices)
 
+    # register callbacks
     bridge.register(data.read_output)
+
+    # start bridge main loop
     bridge.start(hass)
 
 

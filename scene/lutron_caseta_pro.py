@@ -73,7 +73,10 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 
     async_add_devices(devices)
 
+    # register callbacks
     bridge.register(data.read_output)
+
+    # start bridge main loop
     bridge.start(hass)
 
 

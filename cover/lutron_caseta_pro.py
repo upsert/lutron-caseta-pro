@@ -57,7 +57,8 @@ class CasetaData:
                     if action == Caseta.Action.SET:
                         # update zone level, e.g. 90.00
                         device.update_state(value)
-                        yield from device.async_update_ha_state()
+                        if device.hass is not None:
+                            yield from device.async_update_ha_state()
                         break
 
 
@@ -75,13 +76,17 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
                for cover in discovery_info[CONF_DEVICES]]
     data.set_devices(devices)
 
-    for device in devices:
-        yield from device.query()
-
     async_add_devices(devices)
 
+    # register callbacks
     bridge.register(data.read_output)
+
+    # start bridge main loop
     bridge.start(hass)
+
+    # update state for all devices
+    for device in devices:
+        yield from device.query()
 
 
 class CasetaCover(CoverDevice):
