@@ -84,10 +84,6 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     # start bridge main loop
     bridge.start(hass)
 
-    # update state for all devices
-    for device in devices:
-        yield from device.query()
-
 
 class CasetaCover(CoverDevice):
     """Representation of a Lutron shade."""
@@ -104,6 +100,11 @@ class CasetaCover(CoverDevice):
         self._integration = int(cover[CONF_ID])
         self._position = 0
         self._mac = mac
+
+    @asyncio.coroutine
+    def async_added_to_hass(self):
+        """Update initial state."""
+        yield from self.query()
 
     @asyncio.coroutine
     def query(self):

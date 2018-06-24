@@ -79,10 +79,6 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     # start bridge main loop
     bridge.start(hass)
 
-    # update state for all devices
-    for device in devices:
-        yield from device.query()
-
 
 class CasetaSwitch(SwitchDevice):
     """Representation of a Lutron switch."""
@@ -99,6 +95,11 @@ class CasetaSwitch(SwitchDevice):
         self._integration = int(switch[CONF_ID])
         self._is_on = False
         self._mac = mac
+
+    @asyncio.coroutine
+    def async_added_to_hass(self):
+        """Update initial state."""
+        yield from self.query()
 
     @asyncio.coroutine
     def query(self):
