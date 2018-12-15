@@ -37,6 +37,7 @@ CONF_BUTTONS = casetify.CONF_BUTTONS
 CONF_BRIDGES = "bridges"
 CONF_SWITCH = "switch"
 CONF_COVER = "cover"
+CONF_FAN = "fan"
 DEFAULT_TYPE = "light"
 
 CONFIG_SCHEMA = vol.Schema({
@@ -48,6 +49,8 @@ CONFIG_SCHEMA = vol.Schema({
                 vol.Optional(CONF_SWITCH): vol.All(ensure_list,
                                                    [positive_int]),
                 vol.Optional(CONF_COVER): vol.All(ensure_list,
+                                                  [positive_int]),
+                vol.Optional(CONF_FAN): vol.All(ensure_list,
                                                   [positive_int])
             }
         ]),
@@ -152,7 +155,7 @@ def async_setup_bridge(hass, config, fname, bridge):
     _LOGGER.debug("Patched device list %s", devices)
 
     # sort devices based on device types
-    types = {"sensor": [], "switch": [], "light": [], "cover": [], "scene": []}
+    types = {"sensor": [], "switch": [], "light": [], "cover": [], "scene": [], "fan": []}
     for device in devices:
         types[device["type"]].append(device)
 
@@ -176,7 +179,7 @@ def async_setup_bridge(hass, config, fname, bridge):
 @asyncio.coroutine
 def _patch_device_types(bridge, devices):
     """Patch up the device listed based on user-provided config."""
-    for device_type in [CONF_SWITCH, CONF_COVER]:
+    for device_type in [CONF_SWITCH, CONF_COVER, CONF_FAN]:
         # if type was in the configuration yaml
         if device_type in bridge:
             # for each integration ID in the configuration

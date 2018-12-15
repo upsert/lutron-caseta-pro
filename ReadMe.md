@@ -92,17 +92,19 @@ lutron_caseta_pro:
     bridges:
       - host: 192.168.1.100
         mac: a0:f6:fd:12:34:56
-        # Note: Configure only switches and shades, all others will be dimmers
+        # Note: Configure only switches, shades, and fans, all others will be dimmers
         switch: [ 4, 5 ]
         cover: [ 11, 12 ]
+        fan: [ 15 ]
 ```
 
 Configuration variables:
 
 - **switch** (*Optional*): Array of integration IDs ("ID" in the "Zones" section of Integration Report)
 - **cover** (*Optional*): Array of integration IDs ("ID" in the "Zones" section of Integration Report)
+- **fan** (*Optional*): Array of integration IDs ("ID" in the "Zones" section of Integration Report)
 
-In the above example Zone 4 and 5 are configured as switches (e.g. `switch.<device name>` in Home Assistant) and Zones 11 and 12 are shades (e.g. `cover.<device name>` in Home Assistant). If a listed ID is not found in the Integration Report, it will be ignored.
+In the above example Zone 4 and 5 are configured as switches (e.g. `switch.<device name>` in Home Assistant), Zones 11 and 12 are shades (e.g. `cover.<device name>` in Home Assistant), and Zone 15 is a fan (e.g. `fan.<device name>`). If a listed ID is not found in the Integration Report, it will be ignored.
 
 ## Updating
 The Integration Report must be updated after any change to device configuration such as pairing new devices or scene renaming. For scenes, only adding or removing a scene or changing a scene's name will modify the Integration Report and changing light or shade levels will not affect it.
