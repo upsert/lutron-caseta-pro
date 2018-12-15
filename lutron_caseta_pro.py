@@ -28,9 +28,9 @@ _CONFIGURING = {}
 
 DOMAIN = "lutron_caseta_pro"
 
-ATTR_AREA_NAME = "Area Name"
-ATTR_INTEGRATION_ID = "Integration ID"
-ATTR_SCENE_ID = "Scene ID"
+ATTR_AREA_NAME = "area_name"
+ATTR_INTEGRATION_ID = "integration_id"
+ATTR_SCENE_ID = "scene_id"
 CONF_AREA_NAME = casetify.CONF_AREA_NAME
 CONF_SCENE_ID = casetify.CONF_SCENE_ID
 CONF_BUTTONS = casetify.CONF_BUTTONS
