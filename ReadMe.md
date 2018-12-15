@@ -106,6 +106,16 @@ Configuration variables:
 
 In the above example Zone 4 and 5 are configured as switches (e.g. `switch.<device name>` in Home Assistant), Zones 11 and 12 are shades (e.g. `cover.<device name>` in Home Assistant), and Zone 15 is a fan (e.g. `fan.<device name>`). If a listed ID is not found in the Integration Report, it will be ignored.
 
+## Fan Support
+When marking a device as a `fan`, the following speeds are available through the `turn_on` or `set_speed` services:
+ - `'off'`
+ - `'low'`
+ - `'medium'`
+ - `'medium_high'`
+ - `'high'`
+
+If a switch is being used as a fan, call `turn_on` with no `speed` parameter or only use `'off'` or `'high'` for `set_speed`.
+
 ## Updating
 The Integration Report must be updated after any change to device configuration such as pairing new devices or scene renaming. For scenes, only adding or removing a scene or changing a scene's name will modify the Integration Report and changing light or shade levels will not affect it.
 

@@ -7,7 +7,8 @@ Based on work by jhanssen (https://github.com/jhanssen/home-assistant/tree/caset
 import asyncio
 import logging
 
-from homeassistant.components.fan import FanEntity, DOMAIN
+from homeassistant.components.fan import (SPEED_LOW, SPEED_MEDIUM, SPEED_HIGH, SPEED_OFF, SUPPORT_SET_SPEED, FanEntity,
+                                          DOMAIN)
 from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID)
 
 # pylint: disable=relative-beyond-top-level
@@ -15,6 +16,15 @@ from ..lutron_caseta_pro import (Caseta, ATTR_AREA_NAME, CONF_AREA_NAME, ATTR_IN
                                  DOMAIN as COMPONENT_DOMAIN)
 
 _LOGGER = logging.getLogger(__name__)
+
+SPEED_MEDIUM_HIGH = 'medium_high'
+SPEED_MAPPING = {
+    SPEED_OFF: 0,
+    SPEED_LOW: 25,
+    SPEED_MEDIUM: 50,
+    SPEED_MEDIUM_HIGH: 75,
+    SPEED_HIGH: 100
+}
 
 DEPENDENCIES = ['lutron_caseta_pro']
 
@@ -95,6 +105,7 @@ class CasetaFan(FanEntity):
         self._integration = int(fan[CONF_ID])
         self._is_on = False
         self._mac = mac
+        self._speed = SPEED_OFF
 
     @asyncio.coroutine
     def async_added_to_hass(self):
@@ -126,6 +137,11 @@ class CasetaFan(FanEntity):
         return self._name
 
     @property
+    def should_poll(self):
+        """No polling needed for fan."""
+        return False
+
+    @property
     def device_state_attributes(self):
         """Return device specific state attributes."""
         attr = {ATTR_INTEGRATION_ID: self._integration}
@@ -138,19 +154,58 @@ class CasetaFan(FanEntity):
         """Return true if fan is on."""
         return self._is_on
 
-    @asyncio.coroutine
-    def async_turn_on(self, **kwargs):
-        """Instruct the fan to turn on."""
-        _LOGGER.debug("Writing fan OUTPUT value: %d %d 100",
-                      self._integration, Caseta.Action.SET)
-        yield from self._data.caseta.write(Caseta.OUTPUT, self._integration, Caseta.Action.SET, 100)
+    @property
+    def speed(self) -> str:
+        """Return the current speed."""
+        return self._speed
+
+    @property
+    def speed_list(self) -> list:
+        """Get the list of available speeds."""
+        return [SPEED_OFF, SPEED_LOW, SPEED_MEDIUM, SPEED_MEDIUM_HIGH, SPEED_HIGH]
+
+    @property
+    def supported_features(self) -> int:
+        """Flag supported features."""
+        return SUPPORT_SET_SPEED
 
     @asyncio.coroutine
-    def async_turn_off(self, **kwargs):
+    def async_turn_on(self, speed: str = None, **kwargs) -> None:
+        """Instruct the fan to turn on."""
+        if speed is None:
+            speed = SPEED_HIGH
+        yield from self.async_set_speed(speed)
+
+    @asyncio.coroutine
+    def async_set_speed(self, speed: str) -> None:
+        """Set the speed of the fan."""
+        self._speed = speed
+        if speed not in SPEED_MAPPING:
+            _LOGGER.debug("Unknown speed %s, setting to %s", speed, SPEED_HIGH)
+            self._speed = SPEED_HIGH
+        _LOGGER.debug("Writing fan OUTPUT value: %d %d %d",
+                      self._integration, Caseta.Action.SET, SPEED_MAPPING[self._speed])
+        yield from self._data.caseta.write(Caseta.OUTPUT, self._integration, Caseta.Action.SET,
+                                           SPEED_MAPPING[self._speed])
+
+    @asyncio.coroutine
+    def async_turn_off(self, **kwargs) -> None:
         """Instruct the fan to turn off."""
-        _LOGGER.debug("Writing fan OUTPUT value: %d %d 0", self._integration, Caseta.Action.SET)
-        yield from self._data.caseta.write(Caseta.OUTPUT, self._integration, Caseta.Action.SET, 0)
+        yield from self.async_set_speed(SPEED_OFF)
 
     def update_state(self, value):
-        """Update state."""
-        self._is_on = value > 0
+        """Update internal state and fan speed."""
+        self._is_on = value > SPEED_MAPPING[SPEED_OFF]
+        if value in range(SPEED_MAPPING[SPEED_MEDIUM_HIGH] + 1, SPEED_MAPPING[SPEED_HIGH] + 1):
+            self._speed = SPEED_HIGH
+        elif value in range(SPEED_MAPPING[SPEED_MEDIUM] + 1, SPEED_MAPPING[SPEED_MEDIUM_HIGH] + 1):
+            # 51% - 55% are missing from Lutron integration protocol
+            # we will treat as medium_high
+            self._speed = SPEED_MEDIUM_HIGH
+        elif value in range(SPEED_MAPPING[SPEED_LOW] + 1, SPEED_MAPPING[SPEED_MEDIUM] + 1):
+            self._speed = SPEED_MEDIUM
+        elif value in range(SPEED_MAPPING[SPEED_OFF] + 1, SPEED_MAPPING[SPEED_LOW] + 1):
+            self._speed = SPEED_LOW
+        elif value == SPEED_MAPPING[SPEED_OFF]:
+            self._speed = SPEED_OFF
+        _LOGGER.debug("Fan speed is %s", self._speed)
