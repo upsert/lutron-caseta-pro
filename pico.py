@@ -11,7 +11,6 @@ bigkraig (https://github.com/bigkraig)
 
 import logging
 import voluptuous as vol
-
 from homeassistant.helpers.entity_component import EntityComponent
 from homeassistant.core import callback
 from homeassistant.helpers.event import async_track_state_change
@@ -84,8 +83,7 @@ async def async_setup(hass, config):
 
 
 class Pico(Entity):
-    """Pico manages events from pico sensors.
-    """
+    """Pico manages events from pico sensors."""
 
     def __init__(self, hass, name, config):
         """Initialize the Pico component."""
@@ -99,44 +97,37 @@ class Pico(Entity):
         for button, action in config[CONF_BUTTONS].items():
             self._actionmap[button] = _async_get_action(hass, action, button)
 
-    @callback
-    def state_changed(self, entity_id, _, new_state):
+    # @callback
+    async def state_changed(self, entity_id, _, new_state):
         value = new_state.state
         _LOGGER.debug("Received callback from %s with value %s",
                       entity_id, value)
 
         if int(value)&STATE_BUTTON_1 != 0 and BUTTON_1 in self._actionmap:
             _LOGGER.debug("Button 1 pressed, do action")
-            run_coroutine_threadsafe(self._actionmap[BUTTON_1](BUTTON_1), self._hass.loop).result()
-            # self._actionmap[BUTTON_1].run()
+            await self._actionmap[BUTTON_1](entity_id)
 
-        # if int(value)&STATE_BUTTON_2 != 0 and BUTTON_2 in self._actionmap:
-        #     _LOGGER.debug("Button 2 pressed, do action")
-        #     self._actionmap[BUTTON_2](self.entity_id, None, None)
+        if int(value)&STATE_BUTTON_2 != 0 and BUTTON_2 in self._actionmap:
+            _LOGGER.debug("Button 2 pressed, do action")
+            await self._actionmap[BUTTON_2](self.entity_id)
 
-        # if int(value)&STATE_BUTTON_4 != 0 and BUTTON_4 in self._actionmap:
-        #     _LOGGER.debug("Button 4 pressed, do action")
-        #     self._actionmap[BUTTON_4](self.entity_id, None, None)
+        if int(value)&STATE_BUTTON_4 != 0 and BUTTON_4 in self._actionmap:
+            _LOGGER.debug("Button 4 pressed, do action")
+            await self._actionmap[BUTTON_4](self.entity_id)
 
-        # if int(value)&STATE_BUTTON_8 != 0 and BUTTON_8 in self._actionmap:
-        #     _LOGGER.debug("Button 8 pressed, do action")
-        #     self._actionmap[BUTTON_8](self.entity_id, None, None)
+        if int(value)&STATE_BUTTON_8 != 0 and BUTTON_8 in self._actionmap:
+            _LOGGER.debug("Button 8 pressed, do action")
+            await self._actionmap[BUTTON_8](self.entity_id)
 
-        # if int(value)&STATE_BUTTON_16 != 0 and BUTTON_16 in self._actionmap:
-        #     _LOGGER.debug("Button 16 pressed, do action")
-        #     self._actionmap[BUTTON_16](self.entity_id, None, None)
+        if int(value)&STATE_BUTTON_16 != 0 and BUTTON_16 in self._actionmap:
+            _LOGGER.debug("Button 16 pressed, do action")
+            await self._actionmap[BUTTON_16](self.entity_id)
 
         self._state = int(value)
-        self.async_schedule_update_ha_state()
-        # await self.async_update_ha_state()
+        await self.async_update_ha_state()
 
     async def async_added_to_hass(self):
-        async_track_state_change(self.hass, self._sensor,
-                                 self.state_changed)
-
-        # state = self.hass.states.get(self._sensor)
-        # if state is not None:
-        #     self.state_changed(self._sensor, None, state)
+        async_track_state_change(self.hass, self._sensor, self.state_changed)
 
     @property
     def should_poll(self):
@@ -167,11 +158,11 @@ class Pico(Entity):
 
 def _async_get_action(hass, sequence, button):
     """Return an action based on a configuration."""
-    script_obj = script.Script(hass, sequence, name)
+    script_obj = script.Script(hass, sequence, button)
 
     async def action(entity_id):
         """Execute an action."""
-        _LOGGER.info('Executing %s button %s', entity_id, button)
+        _LOGGER.info('Executing %s "%s" button', entity_id, button)
 
         try:
             await script_obj.async_run()
