@@ -257,7 +257,6 @@ class Caseta:
                           self._host, mode, integration, action, value)
             # walk callbacks
             for callback in self._callbacks:
-                _LOGGER.debug("Invoking callback for host %s", self._host)
                 yield from callback.call(mode, integration, action, value)
             self._hass.loop.create_task(self._read_next())
 
