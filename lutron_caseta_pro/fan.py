@@ -168,15 +168,13 @@ class CasetaFan(FanEntity):
         """Flag supported features."""
         return SUPPORT_SET_SPEED
 
-    @asyncio.coroutine
-    def async_turn_on(self, speed: str = None, **kwargs) -> None:
+    async def async_turn_on(self, speed: str = None, **kwargs) -> None:
         """Instruct the fan to turn on."""
         if speed is None:
             speed = SPEED_HIGH
-        yield from self.async_set_speed(speed)
+        await self.async_set_speed(speed)
 
-    @asyncio.coroutine
-    def async_set_speed(self, speed: str) -> None:
+    async def async_set_speed(self, speed: str) -> None:
         """Set the speed of the fan."""
         self._speed = speed
         if speed not in SPEED_MAPPING:
@@ -184,13 +182,12 @@ class CasetaFan(FanEntity):
             self._speed = SPEED_HIGH
         _LOGGER.debug("Writing fan OUTPUT value: %d %d %d",
                       self._integration, Caseta.Action.SET, SPEED_MAPPING[self._speed])
-        yield from self._data.caseta.write(Caseta.OUTPUT, self._integration, Caseta.Action.SET,
-                                           SPEED_MAPPING[self._speed])
+        await self._data.caseta.write(Caseta.OUTPUT, self._integration, Caseta.Action.SET,
+                                      SPEED_MAPPING[self._speed])
 
-    @asyncio.coroutine
-    def async_turn_off(self, **kwargs) -> None:
+    async def async_turn_off(self, **kwargs) -> None:
         """Instruct the fan to turn off."""
-        yield from self.async_set_speed(SPEED_OFF)
+        await self.async_set_speed(SPEED_OFF)
 
     def update_state(self, value):
         """Update internal state and fan speed."""

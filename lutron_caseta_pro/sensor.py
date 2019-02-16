@@ -8,7 +8,6 @@ Source: https://github.com/jhanssen/home-assistant/tree/caseta-0.40
 Additional Authors:
 upsert (https://github.com/upsert)
 """
-import asyncio
 import logging
 
 from homeassistant.components.sensor import DOMAIN
@@ -47,8 +46,7 @@ class CasetaData:
         """Set the device list."""
         self._devices = devices
 
-    @asyncio.coroutine
-    def read_output(self, mode, integration, action, value):
+    async def read_output(self, mode, integration, action, value):
         """Receive output value from the bridge."""
         if mode == Caseta.DEVICE:
             for device in self._devices:
@@ -60,25 +58,24 @@ class CasetaData:
                         _LOGGER.debug("Got Button Press, updating "
                                       "value to: %s", state)
                         device.update_state(device.state | state)
-                        yield from device.async_update_ha_state()
+                        await device.async_update_ha_state()
                     elif value == Caseta.Button.RELEASE:
                         _LOGGER.debug("Got Button Release, updating value."
                                       " Previous state: %s", device.state)
                         device.update_state(device.state & ~state)
                         _LOGGER.debug("State after button release: %s",
                                       device.state)
-                        yield from device.async_update_ha_state()
+                        await device.async_update_ha_state()
                     break
 
 
 # pylint: disable=unused-argument
-@asyncio.coroutine
-def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Setup the platform."""
     if discovery_info is None:
         return
     bridge = Caseta(discovery_info[CONF_HOST])
-    yield from bridge.open()
+    await bridge.open()
 
     data = CasetaData(bridge, hass)
     devices = [CasetaPicoRemote(pico, data, discovery_info[CONF_MAC])

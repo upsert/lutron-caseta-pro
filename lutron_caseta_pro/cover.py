@@ -4,7 +4,6 @@ Platform for Lutron shades.
 Author: upsert (https://github.com/upsert)
 Based on work by jhanssen (https://github.com/jhanssen/home-assistant/tree/caseta-0.40)
 """
-import asyncio
 import logging
 
 from homeassistant.components.cover import (CoverDevice, SUPPORT_OPEN,
@@ -44,8 +43,7 @@ class CasetaData:
         """Set the list of devices."""
         self._devices = devices
 
-    @asyncio.coroutine
-    def read_output(self, mode, integration, action, value):
+    async def read_output(self, mode, integration, action, value):
         """Receive output value from the bridge."""
         # Expect: ~OUTPUT,Integration ID,Action Number,Parameters
         if mode == Caseta.OUTPUT:
@@ -57,18 +55,17 @@ class CasetaData:
                         # update zone level, e.g. 90.00
                         device.update_state(value)
                         if device.hass is not None:
-                            yield from device.async_update_ha_state()
+                            await device.async_update_ha_state()
                         break
 
 
 # pylint: disable=unused-argument
-@asyncio.coroutine
-def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Setup the platform."""
     if discovery_info is None:
         return
     bridge = Caseta(discovery_info[CONF_HOST])
-    yield from bridge.open()
+    await bridge.open()
 
     data = CasetaData(bridge, hass)
     devices = [CasetaCover(cover, data, discovery_info[CONF_MAC])
@@ -100,16 +97,14 @@ class CasetaCover(CoverDevice):
         self._position = 0
         self._mac = mac
 
-    @asyncio.coroutine
-    def async_added_to_hass(self):
+    async def async_added_to_hass(self):
         """Update initial state."""
-        yield from self.query()
+        await self.query()
 
-    @asyncio.coroutine
-    def query(self):
+    async def query(self):
         """Queries the bridge for the current state of the device."""
-        yield from self._data.caseta.query(Caseta.OUTPUT,
-                                           self._integration, Caseta.Action.SET)
+        await self._data.caseta.query(Caseta.OUTPUT,
+                                      self._integration, Caseta.Action.SET)
 
     def update_state(self, new_position):
         """Update position value."""
@@ -152,24 +147,21 @@ class CasetaCover(CoverDevice):
         """Return current position of the cover."""
         return self._position
 
-    @asyncio.coroutine
-    def async_open_cover(self, **kwargs):
+    async def async_open_cover(self, **kwargs):
         """Close the cover."""
         # Parameters are Level, Fade, Delay
         # Fade is ignored and Delay set to 0
-        yield from self._data.caseta.write(Caseta.OUTPUT, self._integration,
-                                           Caseta.Action.SET, 100, 0, 0)
+        await self._data.caseta.write(Caseta.OUTPUT, self._integration,
+                                      Caseta.Action.SET, 100, 0, 0)
 
-    @asyncio.coroutine
-    def async_close_cover(self, **kwargs):
+    async def async_close_cover(self, **kwargs):
         """Close the cover."""
         # Parameters are Level, Fade, Delay
         # Fade is ignored and Delay set to 0
-        yield from self._data.caseta.write(Caseta.OUTPUT, self._integration,
-                                           Caseta.Action.SET, 0, 0, 0)
+        await self._data.caseta.write(Caseta.OUTPUT, self._integration,
+                                      Caseta.Action.SET, 0, 0, 0)
 
-    @asyncio.coroutine
-    def async_set_cover_position(self, **kwargs):
+    async def async_set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
         if ATTR_POSITION in kwargs:
             position = kwargs[ATTR_POSITION]
@@ -183,17 +175,16 @@ class CasetaCover(CoverDevice):
                 position = 100
             # Parameters are Level, Fade, Delay
             # Fade is ignored and Delay set to 0
-            yield from self._data.caseta.write(Caseta.OUTPUT,
-                                               self._integration,
-                                               Caseta.Action.SET, position,
-                                               0, 0)
+            await self._data.caseta.write(Caseta.OUTPUT,
+                                          self._integration,
+                                          Caseta.Action.SET, position,
+                                          0, 0)
 
     @property
     def supported_features(self):
         return SUPPORT_OPEN | SUPPORT_CLOSE | SUPPORT_STOP | SUPPORT_SET_POSITION
 
-    @asyncio.coroutine
-    def async_stop_cover(self, **kwargs):
+    async def async_stop_cover(self, **kwargs):
         """Stop raising or lowering the shade."""
-        yield from self._data.caseta.write(Caseta.OUTPUT, self._integration,
-                                           Caseta.Action.STOP, None)
+        await self._data.caseta.write(Caseta.OUTPUT, self._integration,
+                                      Caseta.Action.STOP, None)

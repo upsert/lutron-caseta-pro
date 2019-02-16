@@ -32,8 +32,7 @@ CONF_BUTTONS = "buttons"
 _LOGGER = logging.getLogger(__name__)
 
 
-@asyncio.coroutine
-def async_load_integration_report(fname):
+async def async_load_integration_report(fname):
     """Process a JSON integration report and return a list of devices.
 
     Each returned device will have an 'id', 'name', 'type' and optionally
@@ -98,8 +97,6 @@ def _process_scenes(devices, device):
 class Casetify:
     """Async class to communicate with Lutron bridge."""
 
-    loop = asyncio.get_event_loop()
-
     OUTPUT = "OUTPUT"
     DEVICE = "DEVICE"
 
@@ -140,12 +137,11 @@ class Casetify:
         """Returns if the connection is open."""
         return self._state == Casetify.State.Opened
 
-    @asyncio.coroutine
-    def open(self, host, port=23, username=DEFAULT_USER,
-             password=DEFAULT_PASSWORD):
+    async def open(self, host, port=23, username=DEFAULT_USER,
+                   password=DEFAULT_PASSWORD):
         """Open a Telnet connection to Lutron bridge."""
-        with (yield from self._read_lock):
-            with (yield from self._write_lock):
+        async with self._read_lock:
+            async with self._write_lock:
                 if self._state != Casetify.State.Closed:
                     return
                 self._state = Casetify.State.Opening
@@ -157,8 +153,7 @@ class Casetify:
 
                 # open connection
                 try:
-                    connection = yield from asyncio.open_connection(host, port,
-                                                                    loop=Casetify.loop)
+                    connection = await asyncio.open_connection(host, port)
                 except OSError as err:
                     _LOGGER.warning("Error opening connection to Lutron bridge: %s", err)
                     self._state = Casetify.State.Closed
@@ -168,16 +163,15 @@ class Casetify:
                 self.writer = connection[1]
 
                 # do login
-                yield from self._read_until(b"login: ")
+                await self._read_until(b"login: ")
                 self.writer.write(username + b"\r\n")
-                yield from self._read_until(b"password: ")
+                await self._read_until(b"password: ")
                 self.writer.write(password + b"\r\n")
-                yield from self._read_until(b"GNET> ")
+                await self._read_until(b"GNET> ")
 
                 self._state = Casetify.State.Opened
 
-    @asyncio.coroutine
-    def _read_until(self, value):
+    async def _read_until(self, value):
         """Read until a given value is reached."""
         while True:
             if hasattr(value, "search"):
@@ -192,18 +186,17 @@ class Casetify:
                     self._read_buffer = self._read_buffer[where + len(value):]
                     return True
             try:
-                self._read_buffer += yield from self.reader.read(READ_SIZE)
+                self._read_buffer += await self.reader.read(READ_SIZE)
             except OSError as err:
                 _LOGGER.warning("Error reading from Lutron bridge: %s", err)
                 return False
 
-    @asyncio.coroutine
-    def read(self):
+    async def read(self):
         """Return a list of values read from the Telnet interface."""
-        with (yield from self._read_lock):
+        async with self._read_lock:
             if self._state != Casetify.State.Opened:
                 return None, None, None, None
-            match = yield from self._read_until(CASETA_RE)
+            match = await self._read_until(CASETA_RE)
             if match is not False:
                 # 1 = mode, 2 = integration number,
                 # 3 = action number, 4 = value
@@ -217,16 +210,15 @@ class Casetify:
             # attempt to reconnect
             _LOGGER.info("Reconnecting to Lutron bridge %s", self._host)
             self._state = Casetify.State.Closed
-            yield from self.open(self._host, self._port, self._username,
-                                 self._password)
+            await self.open(self._host, self._port, self._username,
+                            self._password)
         return None, None, None, None
 
-    @asyncio.coroutine
-    def write(self, mode, integration, action, *args, value=None):
+    async def write(self, mode, integration, action, *args, value=None):
         """Write a list of values out to the Telnet interface."""
         if hasattr(action, "value"):
             action = action.value
-        with (yield from self._write_lock):
+        async with self._write_lock:
             if self._state != Casetify.State.Opened:
                 return
             data = "#{},{},{}".format(mode, integration, action)
@@ -240,23 +232,21 @@ class Casetify:
             except OSError as err:
                 _LOGGER.warning("Error writing out to the Lutron bridge: %s", err)
 
-    @asyncio.coroutine
-    def query(self, mode, integration, action):
+    async def query(self, mode, integration, action):
         """Query a device to get its current state."""
         if hasattr(action, "value"):
             action = action.value
         _LOGGER.debug("Sending query %s, integration %s, action %s",
                       mode, integration, action)
-        with (yield from self._write_lock):
+        async with self._write_lock:
             if self._state != Casetify.State.Opened:
                 return
             self.writer.write("?{},{},{}\r\n".format(mode, integration,
                                                      action).encode())
 
-    @asyncio.coroutine
-    def ping(self):
+    async def ping(self):
         """Ping the interface to keep the connection alive."""
-        with (yield from self._write_lock):
+        async with self._write_lock:
             if self._state != Casetify.State.Opened:
                 return
             self.writer.write(b"?SYSTEM,10\r\n")

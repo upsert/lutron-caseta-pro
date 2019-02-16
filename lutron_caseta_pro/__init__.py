@@ -58,8 +58,7 @@ CONFIG_SCHEMA = vol.Schema({
 }, extra=vol.ALLOW_EXTRA)
 
 
-@asyncio.coroutine
-def request_configuration(hass, config, host, bridge):
+async def request_configuration(hass, config, host, bridge):
     """Request configuration from the user to configure a host."""
     configurator = hass.components.configurator
 
@@ -121,8 +120,7 @@ def get_config_file(hass, host):
     return hass.config.path(DOMAIN + "_" + host + ".json")
 
 
-@asyncio.coroutine
-def async_setup(hass, config):
+async def async_setup(hass, config):
     """Initialize the component and loads the integration report."""
     if CONF_BRIDGES in config[DOMAIN]:
         for bridge in config[DOMAIN][CONF_BRIDGES]:
@@ -137,21 +135,20 @@ def async_setup(hass, config):
                 hass.async_add_job(request_configuration, hass, config, host, bridge)
             else:
                 _LOGGER.debug("Loading Integration Report %s", fname)
-                yield from async_setup_bridge(hass, config, fname, bridge)
+                await async_setup_bridge(hass, config, fname, bridge)
 
     return True
 
 
-@asyncio.coroutine
-def async_setup_bridge(hass, config, fname, bridge):
+async def async_setup_bridge(hass, config, fname, bridge):
     """Initialize a bridge by loading its integration report."""
     _LOGGER.debug("Setting up bridge using Integration Report %s", fname)
 
-    devices = yield from casetify.async_load_integration_report(fname)
+    devices = await casetify.async_load_integration_report(fname)
 
     # Patch up device types from configuration.
     # All other devices will be treated as lights.
-    yield from _patch_device_types(bridge, devices)
+    await _patch_device_types(bridge, devices)
     _LOGGER.debug("Patched device list %s", devices)
 
     # sort devices based on device types
@@ -176,8 +173,7 @@ def async_setup_bridge(hass, config, fname, bridge):
                  CONF_DEVICES: types[device_type]}, config))
 
 
-@asyncio.coroutine
-def _patch_device_types(bridge, devices):
+async def _patch_device_types(bridge, devices):
     """Patch up the device listed based on user-provided config."""
     for device_type in [CONF_SWITCH, CONF_COVER, CONF_FAN]:
         # if type was in the configuration yaml
@@ -214,13 +210,12 @@ class Caseta:
             self.callback_attr = attr
             self.token = None
 
-        @asyncio.coroutine
-        def call(self, *args, **kwargs):
+        async def call(self, *args, **kwargs):
             """Call the callback referenced by this object."""
             obj = self.wref()
             if obj:
                 attr = getattr(obj, self.callback_attr)
-                yield from attr(*args, **kwargs)
+                await attr(*args, **kwargs)
 
         def object_deleted(self, wref):
             """Delete the callback when it expires."""
@@ -242,10 +237,9 @@ class Caseta:
             """Return self plus host name."""
             return repr(self) + self._host
 
-        @asyncio.coroutine
-        def _read_next(self):
+        async def _read_next(self):
             """Read and process a value from the Lutron interface."""
-            read_response = yield from self._casetify.read()
+            read_response = await self._casetify.read()
             mode = read_response[0]
             integration = read_response[1]
             action = read_response[2]
@@ -257,25 +251,23 @@ class Caseta:
                           self._host, mode, integration, action, value)
             # walk callbacks
             for callback in self._callbacks:
-                yield from callback.call(mode, integration, action, value)
+                await callback.call(mode, integration, action, value)
             self._hass.loop.create_task(self._read_next())
 
-        @asyncio.coroutine
-        def _reconnect(self):
+        async def _reconnect(self):
             """Attempt to re-connect to the Lutron bridge."""
             if not self._casetify.is_connected():
-                yield from self._casetify.open(self._host)
+                await self._casetify.open(self._host)
                 if not self._casetify.is_connected():
                     _LOGGER.debug("Waiting to reconnect.")
                 else:
                     _LOGGER.debug("Re-connected to the Lutron bridge.")
                     # TODO update state for all devices
 
-        @asyncio.coroutine
-        def _ping(self):
+        async def _ping(self):
             """Send a ping to the Caseta interface."""
-            yield from asyncio.sleep(60)
-            yield from self._casetify.ping()
+            await asyncio.sleep(60)
+            await self._casetify.ping()
 
             # check the connection, reconnect if needed
             if not self._casetify.is_connected():
@@ -284,31 +276,28 @@ class Caseta:
 
             self._hass.loop.create_task(self._ping())
 
-        @asyncio.coroutine
-        def open(self):
+        async def open(self):
             """Open a connection to the Lutron bridge."""
             if self._casetify is not None:
                 # connection already open
                 return True
             _LOGGER.info("Opening connection to host %s", self._host)
             self._casetify = casetify.Casetify()
-            yield from self._casetify.open(self._host)
+            await self._casetify.open(self._host)
             return True
 
-        @asyncio.coroutine
-        def write(self, mode, integration, action, value, *args):
+        async def write(self, mode, integration, action, value, *args):
             """Write a value to the Lutron bridge."""
             if self._casetify is None:
                 return False
-            yield from self._casetify.write(mode, integration, action, value, *args)
+            await self._casetify.write(mode, integration, action, value, *args)
             return True
 
-        @asyncio.coroutine
-        def query(self, mode, integration, action):
+        async def query(self, mode, integration, action):
             """Query a device value from the Lutron bridge."""
             if self._casetify is None:
                 return False
-            yield from self._casetify.query(mode, integration, action)
+            await self._casetify.query(mode, integration, action)
             return True
 
         def register(self, callback):
