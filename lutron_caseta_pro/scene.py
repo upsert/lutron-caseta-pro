@@ -10,8 +10,7 @@ import logging
 from homeassistant.components.scene import Scene, DOMAIN
 from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID)
 
-# pylint: disable=relative-beyond-top-level
-from ..lutron_caseta_pro import (Caseta, ATTR_SCENE_ID, CONF_SCENE_ID, DOMAIN as COMPONENT_DOMAIN)
+from . import (Caseta, ATTR_SCENE_ID, CONF_SCENE_ID, DOMAIN as COMPONENT_DOMAIN)
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -7,13 +7,12 @@ Based on work by jhanssen (https://github.com/jhanssen/home-assistant/tree/caset
 import asyncio
 import logging
 
-from homeassistant.components.fan import (SPEED_LOW, SPEED_MEDIUM, SPEED_HIGH, SPEED_OFF, SUPPORT_SET_SPEED, FanEntity,
-                                          DOMAIN)
+from homeassistant.components.fan import (SPEED_LOW, SPEED_MEDIUM, SPEED_HIGH, SPEED_OFF,
+                                          SUPPORT_SET_SPEED, FanEntity, DOMAIN)
 from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID)
 
-# pylint: disable=relative-beyond-top-level
-from ..lutron_caseta_pro import (Caseta, ATTR_AREA_NAME, CONF_AREA_NAME, ATTR_INTEGRATION_ID,
-                                 DOMAIN as COMPONENT_DOMAIN)
+from . import (Caseta, ATTR_AREA_NAME, CONF_AREA_NAME, ATTR_INTEGRATION_ID,
+               DOMAIN as COMPONENT_DOMAIN)
 
 _LOGGER = logging.getLogger(__name__)
 

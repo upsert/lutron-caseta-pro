@@ -12,13 +12,13 @@ import asyncio
 import logging
 
 from homeassistant.components.sensor import DOMAIN
-from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID)
+from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC,
+                                 CONF_NAME, CONF_ID)
 from homeassistant.helpers.entity import Entity
 
-# pylint: disable=relative-beyond-top-level
-from ..lutron_caseta_pro import (Caseta, CONF_BUTTONS, ATTR_AREA_NAME,
-                                 CONF_AREA_NAME, ATTR_INTEGRATION_ID,
-                                 DOMAIN as COMPONENT_DOMAIN)
+from . import (Caseta, CONF_BUTTONS, ATTR_AREA_NAME,
+               CONF_AREA_NAME, ATTR_INTEGRATION_ID,
+               DOMAIN as COMPONENT_DOMAIN)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -57,13 +57,16 @@ class CasetaData:
                                   integration, action, value)
                     state = 1 << action - device.minbutton
                     if value == Caseta.Button.PRESS:
-                        _LOGGER.debug("Got Button Press, updating value to: %s", state)
+                        _LOGGER.debug("Got Button Press, updating "
+                                      "value to: %s", state)
                         device.update_state(device.state | state)
                         yield from device.async_update_ha_state()
                     elif value == Caseta.Button.RELEASE:
-                        _LOGGER.debug("Got Button Release, updating value. Previous state: %s", device.state)
+                        _LOGGER.debug("Got Button Release, updating value."
+                                      " Previous state: %s", device.state)
                         device.update_state(device.state & ~state)
-                        _LOGGER.debug("State after button release: %s", device.state)
+                        _LOGGER.debug("State after button release: %s",
+                                      device.state)
                         yield from device.async_update_ha_state()
                     break
 

@@ -14,9 +14,8 @@ from homeassistant.components.light import (
     ATTR_BRIGHTNESS, ATTR_TRANSITION, SUPPORT_BRIGHTNESS, SUPPORT_TRANSITION, Light, DOMAIN)
 from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_TYPE, CONF_NAME, CONF_ID)
 
-# pylint: disable=relative-beyond-top-level
-from ..lutron_caseta_pro import (Caseta, DEFAULT_TYPE, ATTR_AREA_NAME, CONF_AREA_NAME,
-                                 ATTR_INTEGRATION_ID, DOMAIN as COMPONENT_DOMAIN)
+from . import (Caseta, DEFAULT_TYPE, ATTR_AREA_NAME, CONF_AREA_NAME,
+               ATTR_INTEGRATION_ID, DOMAIN as COMPONENT_DOMAIN)
 
 _LOGGER = logging.getLogger(__name__)
 

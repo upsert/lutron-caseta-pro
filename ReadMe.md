@@ -5,8 +5,7 @@
 This is a custom [Home Assistant](https://home-assistant.io/) component to support the following models of Lutron bridges / main repeaters:
 
 - [Lutron Caseta](http://www.casetawireless.com) Smart Bridge **PRO** (L-BDGPRO2-WH)
-- [Ra2 Select](http://www.lutron.com/en-US/Products/Pages/WholeHomeSystems/RA2Select/Overview.aspx) Main Repeater (RR-SEL-REP-BL)
-- [Ra2 Select](http://www.lutron.com/en-US/Products/Pages/WholeHomeSystems/RA2Select/Overview.aspx) Main Repeater for SnapAV (RR-SEL-REP2S-BL)
+- [Ra2 Select](http://www.lutron.com/en-US/Products/Pages/WholeHomeSystems/RA2Select/Overview.aspx) Main Repeater (RR-SEL-REP-BL / RR-SEL-REP2S-BL / RRK-SEL-REP2-BL)
 
 The bridges / main repeaters are supported through their Telnet integration interface which must be enabled for this component to function. The non-PRO model of the Caseta bridge is not supported. No other interfaces to the Smart Bridge or Main Repeater are used by this component.
 
@@ -24,15 +23,15 @@ This component differs from the [Lutron Caseta](https://home-assistant.io/compon
 As this is currently a custom component, it must be installed for it to be loaded by Home Assistant.
 
 1. Create a directory `custom_components` in your Home Assistant configuration directory ('config' share if using [hass.io](https://home-assistant.io/hassio/) with the [Samba](https://home-assistant.io/addons/samba/) add-on or `~/.home-assistant/` for Linux installations).
-1. Copy the contents of this project including all sub-directories into the directory `custom_components`.
+1. Copy `lutron_caseta_pro` from this project including all sub-directories into the directory `custom_components`.
 
 It should look similar to this after installation:
 ```
 /configuration.yaml
-/custom_components/lutron_caseta_pro.py
-/custom_components/casetify.py
-/custom_components/cover/
-/custom_components/light/
+/custom_components/lutron_caseta_pro/__init__.py
+/custom_components/lutron_caseta_pro/casetify.py
+/custom_components/lutron_caseta_pro/cover.py
+/custom_components/lutron_caseta_pro/light.py
  ... etc...
 ```
 3. Proceed with first time setup.
@@ -41,13 +40,13 @@ It should look similar to this after installation:
 1. Setup the Lutron app and add all your Lutron devices through the app. Enable Telnet Support under settings menu -> Advanced -> Integration. Also enable static IP under Network Settings and write down the IP.
 1. In your Home Assistant installation, install the custom component by copying in the files as noted in the instructions.
 1. In Home Assistant `configuration.yaml` create a minimal configuration for the custom component (see below) using the IP address you wrote down and start Home Assistant.
-1. Once started and assuming first time setup, open Home Assistant on your mobile device and you should see a prompt to Configure Lutron Caseta Smart Bridge PRO on the front-end. Click on Configure and you’ll see a box to paste your Integration Report.
+1. Once started and assuming first time setup, open Home Assistant on your mobile device and you should see a notification to Configure Lutron Caseta Smart Bridge PRO on the front-end. Click on Configure and you’ll see a box to paste your Integration Report.
 1. Switch over to the Lutron app, go to settings -> Advanced -> Integration -> Send Integration Report. When prompted, select ‘Copy to clipboard’.
 1. Switch back to Home Assistant front-end and paste in the Integration Report. If your phone does not have copy and paste options, you will need to share it to yourself through email or to another app that supports copy paste.
 1. Once you submit the Integration Report the component should setup all your devices as dimmers and will save the Integration Report to your config directory as a JSON file.
-1. If you have switches or Lutron shades, open the Integration Report in your config directory using a text editor and find their Integration IDs and edit your Home Assistant configuration as described in the instructions below to tell it which devices are switches or shades. Unfortunately, the Integration Report does not contain this information so you need to do this manually if you have switches or shades. Restart Home Assistant if you change the yaml file.
+1. If you have switches, fans or Lutron shades, open the Integration Report in your config directory using a text editor and find their Integration IDs and edit your Home Assistant configuration as described in the instructions below to tell it which devices are switches or shades. Unfortunately, the Integration Report does not contain this information so you need to do this manually if you have switches, fans or shades. Restart Home Assistant if you change the yaml file.
 
-After first-time configuration, the JSON-format Integration Report will be saved to your Home Assistant configuration directory as `lutron_caseta_pro_<bridge ip address>.json`, where `<bridge ip address>` is the IP address of the Bridge / Main Repeater. If it cannot find the Integration Report, it will use Configurator to prompt the user to enter it on the frontend.
+After first-time configuration, the JSON-format Integration Report will be saved to your Home Assistant configuration directory as `lutron_caseta_pro_<bridge ip address>.json`, where `<bridge ip address>` is the IP address of the Bridge / Main Repeater. If it cannot find the Integration Report, it will prompt the user to enter it on the frontend.
 
 When configured, the `lutron_caseta_pro` component will load the Integration Report and setup **all the zones as dimmable lights unless configured otherwise** (see below).
 
@@ -158,10 +157,6 @@ logger:
 ```
 
 If connection errors are evident, try connecting to the IP listed in the configuration using a Telnet client such as [PuTTY](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html). A connection refused or timeout error indicates the wrong IP address has been used or the Telnet Support has not been enabled in the mobile app under Settings -> Advanced -> Integration.
-
-## TODO
-
-* Confirm compatibility with Lutron occupancy sensors on Ra2 Select.
 
 ## Credits
 

@@ -51,7 +51,7 @@ CONFIG_SCHEMA = vol.Schema({
                 vol.Optional(CONF_COVER): vol.All(ensure_list,
                                                   [positive_int]),
                 vol.Optional(CONF_FAN): vol.All(ensure_list,
-                                                  [positive_int])
+                                                [positive_int])
             }
         ]),
     }),
