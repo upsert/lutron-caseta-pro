@@ -37,6 +37,7 @@ CONF_BUTTONS = casetify.CONF_BUTTONS
 CONF_BRIDGES = "bridges"
 CONF_SWITCH = "switch"
 CONF_COVER = "cover"
+CONF_TRANSITION_TIME = "default_transition_seconds"
 CONF_FAN = "fan"
 DEFAULT_TYPE = "light"
 
@@ -46,6 +47,7 @@ CONFIG_SCHEMA = vol.Schema({
             {
                 vol.Required(CONF_HOST): string,
                 vol.Optional(CONF_MAC): string,
+                vol.Optional(CONF_TRANSITION_TIME): positive_int,
                 vol.Optional(CONF_SWITCH): vol.All(ensure_list,
                                                    [positive_int]),
                 vol.Optional(CONF_COVER): vol.All(ensure_list,
@@ -161,6 +163,11 @@ async def async_setup_bridge(hass, config, fname, bridge):
     if CONF_MAC in bridge:
         mac_address = bridge[CONF_MAC]
 
+    # Load default transition time, if present.
+    transition_time = None
+    if CONF_TRANSITION_TIME in bridge:
+        transition_time = bridge[CONF_TRANSITION_TIME]
+
     # load platform by type
     for device_type in types:
         component = device_type
@@ -170,7 +177,8 @@ async def async_setup_bridge(hass, config, fname, bridge):
                 hass, component, DOMAIN,
                 {CONF_HOST: bridge[CONF_HOST],
                  CONF_MAC: mac_address,
-                 CONF_DEVICES: types[device_type]}, config))
+                 CONF_DEVICES: types[device_type],
+                 CONF_TRANSITION_TIME: transition_time }, config))
 
 
 async def _patch_device_types(bridge, devices):
