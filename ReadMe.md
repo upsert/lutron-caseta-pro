@@ -16,8 +16,11 @@ The currently supported Lutron devices are:
 - Scenes as Home Assistant [scenes](https://home-assistant.io/components/scene/)
 - Lutron shades as Home Assistant [covers](https://home-assistant.io/components/cover/)
 - Pico remotes as Home Assistant [sensors](https://www.home-assistant.io/components/sensor/)
+- Fan controllers as Home Assistant [fans](https://www.home-assistant.io/components/fan/)
 
-This component differs from the [Lutron Caseta](https://home-assistant.io/components/lutron_caseta/) component in that it only works with the PRO model and uses the relatively well-documented (although still not officially supported) Telnet interface and the [Lutron Integration Protocol](http://www.lutron.com/TechnicalDocumentLibrary/040249.pdf). The Ra2 Select Main Repeater functions identically to the Caseta PRO model but with support for 100 devices and a different product line of dimmers, switches, fan controls, shades and occupancy sensors that is not compatible with Caseta.
+This component differs from the [Lutron Caseta](https://home-assistant.io/components/lutron_caseta/) component in that it only works with the PRO model and uses the relatively well-documented (although still not officially supported) Telnet interface and the [Lutron Integration Protocol](http://www.lutron.com/TechnicalDocumentLibrary/040249.pdf).
+
+The Ra2 Select Main Repeater functions identically to the Caseta PRO model but with support for 100 devices and a different product line of dimmers, switches, fan controls, shades and occupancy sensors that is not compatible with Caseta.
 
 ## Custom Component Installation
 As this is currently a custom component, it must be installed for it to be loaded by Home Assistant.
