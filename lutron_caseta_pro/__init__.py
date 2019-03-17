@@ -16,6 +16,7 @@ import weakref
 
 import voluptuous as vol
 from homeassistant.const import (CONF_ID, CONF_DEVICES, CONF_HOST, CONF_TYPE, CONF_MAC)
+from homeassistant.components.light import (VALID_TRANSITION)
 from homeassistant.helpers import discovery
 from homeassistant.helpers.config_validation import ensure_list, string, \
     positive_int
@@ -47,7 +48,7 @@ CONFIG_SCHEMA = vol.Schema({
             {
                 vol.Required(CONF_HOST): string,
                 vol.Optional(CONF_MAC): string,
-                vol.Optional(CONF_TRANSITION_TIME): positive_int,
+                vol.Optional(CONF_TRANSITION_TIME): VALID_TRANSITION,
                 vol.Optional(CONF_SWITCH): vol.All(ensure_list,
                                                    [positive_int]),
                 vol.Optional(CONF_COVER): vol.All(ensure_list,
