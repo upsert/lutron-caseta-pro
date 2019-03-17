@@ -13,8 +13,8 @@ from homeassistant.components.light import (
     ATTR_BRIGHTNESS, ATTR_TRANSITION, SUPPORT_BRIGHTNESS, SUPPORT_TRANSITION, Light, DOMAIN)
 from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_TYPE, CONF_NAME, CONF_ID)
 
-from . import (Caseta, DEFAULT_TYPE, ATTR_AREA_NAME, CONF_AREA_NAME,
-               ATTR_INTEGRATION_ID, DOMAIN as COMPONENT_DOMAIN)
+from . import (Caseta, DEFAULT_TYPE, ATTR_AREA_NAME, ATTR_INTEGRATION_ID,
+    CONF_AREA_NAME, CONF_TRANSITION_TIME, DOMAIN as COMPONENT_DOMAIN)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     await bridge.open()
 
     data = CasetaData(bridge)
-    devices = [CasetaLight(light, data, discovery_info[CONF_MAC])
+    devices = [CasetaLight(light, data, discovery_info[CONF_MAC], discovery_info[CONF_TRANSITION_TIME])
                for light in discovery_info[CONF_DEVICES]]
     data.set_devices(devices)
 
@@ -107,7 +107,7 @@ def _format_transition(transition) -> str:
 class CasetaLight(Light):
     """Representation of a Lutron light."""
 
-    def __init__(self, light, data, mac):
+    def __init__(self, light, data, mac, transition):
         """Initialize a Lutron light."""
         self._data = data
         self._name = light[CONF_NAME]
@@ -121,6 +121,7 @@ class CasetaLight(Light):
         self._is_on = False
         self._brightness = 0
         self._mac = mac
+        self._default_transition = transition
 
     async def async_added_to_hass(self):
         """Update initial state."""
@@ -181,6 +182,8 @@ class CasetaLight(Light):
                 value = "{:0>.2f}".format((kwargs[ATTR_BRIGHTNESS] / 255) * 100)
             if ATTR_TRANSITION in kwargs:
                 transition = _format_transition(float(kwargs[ATTR_TRANSITION]))
+            elif self._default_transition is not None:
+                transition = _format_transition(self._default_transition)
         _LOGGER.debug("Writing light OUTPUT value: %d %d %s %s",
                       self._integration, Caseta.Action.SET, value,
                       transition)
@@ -193,6 +196,8 @@ class CasetaLight(Light):
         if self._is_dimmer:
             if ATTR_TRANSITION in kwargs:
                 transition = _format_transition(float(kwargs[ATTR_TRANSITION]))
+            elif self._default_transition is not None:
+                transition = _format_transition(self._default_transition)
         _LOGGER.debug("Writing light OUTPUT value: %d %d 0 %s",
                       self._integration, Caseta.Action.SET, str(transition))
         await self._data.caseta.write(Caseta.OUTPUT, self._integration, Caseta.Action.SET, 0,
