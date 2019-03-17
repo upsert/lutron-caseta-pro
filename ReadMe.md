@@ -81,9 +81,9 @@ It is optional, but **strongly encouraged** for your configuration to allow for
 renaming entities IDs and other customization features in the front-end.
 
 
-## Configuration with Device Types
+## Configuration
 
-Additional configuration is provided to set the device types according to the Integration IDs in the JSON integration report:
+Additional configuration is provided:
 
 ```yaml
 # Example configuration.yaml entry with device types
@@ -91,6 +91,7 @@ lutron_caseta_pro:
     bridges:
       - host: 192.168.1.100
         mac: a0:f6:fd:12:34:56
+        default_transition_seconds: 1.0
         # Note: Configure only switches, shades, and fans, all others will be dimmers
         switch: [ 4, 5 ]
         cover: [ 11, 12 ]
@@ -99,6 +100,7 @@ lutron_caseta_pro:
 
 Configuration variables:
 
+- **default_transition_seconds** (*Optional*): Optional number of seconds to apply to every light transition (both on and off). Only affects dimmable lights and value is in seconds.
 - **switch** (*Optional*): Array of integration IDs ("ID" in the "Zones" section of Integration Report)
 - **cover** (*Optional*): Array of integration IDs ("ID" in the "Zones" section of Integration Report)
 - **fan** (*Optional*): Array of integration IDs ("ID" in the "Zones" section of Integration Report)
