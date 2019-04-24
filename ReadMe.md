@@ -136,7 +136,7 @@ custom_updater:
   track:
     - components
   component_urls:
-    - https://raw.githubusercontent.com/rsnodgrass/lutron-caseta-pro/master/custom_updater.json
+    - https://raw.githubusercontent.com/upsert/lutron-caseta-pro/master/custom_updater.json
 ``` 
 
 ## Pico Remote Sensors
