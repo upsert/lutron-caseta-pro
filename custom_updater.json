@@ -5,7 +5,7 @@
       "local_location": "/custom_components/lutron_caseta_pro/__init__.py",
       "remote_location": "https://raw.githubusercontent.com/upsert/lutron-caseta-pro/master/lutron_caseta_pro/__init__.py",
       "visit_repo": "https://github.com/upsert/lutron-caseta-pro",
-      "changelog": "https://github.com/upsert/lutron-caseta-pro"
+      "changelog": "https://github.com/upsert/lutron-caseta-pro",
       "resources": [
         "https://raw.githubusercontent.com/upsert/lutron-caseta-pro/master/lutron_caseta_pro/casetify.py",
         "https://raw.githubusercontent.com/upsert/lutron-caseta-pro/master/lutron_caseta_pro/cover.py",
