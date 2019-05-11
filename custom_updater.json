@@ -1,7 +1,7 @@
 {
     "lutron-caseta-pro": {
-      "updated_at": "2019-04-24",
-      "version": "0.1.7",
+      "updated_at": "2019-05-11",
+      "version": "0.1.8",
       "local_location": "/custom_components/lutron_caseta_pro/__init__.py",
       "remote_location": "https://raw.githubusercontent.com/upsert/lutron-caseta-pro/master/lutron_caseta_pro/__init__.py",
       "visit_repo": "https://github.com/upsert/lutron-caseta-pro",
@@ -13,7 +13,8 @@
         "https://raw.githubusercontent.com/upsert/lutron-caseta-pro/master/lutron_caseta_pro/light.py",
         "https://raw.githubusercontent.com/upsert/lutron-caseta-pro/master/lutron_caseta_pro/scene.py",
         "https://raw.githubusercontent.com/upsert/lutron-caseta-pro/master/lutron_caseta_pro/sensor.py",
-        "https://raw.githubusercontent.com/upsert/lutron-caseta-pro/master/lutron_caseta_pro/switch.py"
+        "https://raw.githubusercontent.com/upsert/lutron-caseta-pro/master/lutron_caseta_pro/switch.py",
+        "https://raw.githubusercontent.com/upsert/lutron-caseta-pro/master/lutron_caseta_pro/manifest.json"
       ]
     }
 }
