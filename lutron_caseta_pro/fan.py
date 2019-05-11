@@ -25,8 +25,6 @@ SPEED_MAPPING = {
     SPEED_HIGH: 100
 }
 
-DEPENDENCIES = ['lutron_caseta_pro']
-
 
 class CasetaData:
     """Data holder for a fan."""

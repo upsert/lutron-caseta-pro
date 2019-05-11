@@ -1,0 +1,8 @@
+{
+  "domain": "lutron_caseta_pro",
+  "name": "Lutron Caséta Smart Bridge PRO / RA2 Select",
+  "documentation": "https://github.com/upsert/lutron-caseta-pro",
+  "dependencies": [],
+  "codeowners": ["@upsert"],
+  "requirements": []
+}

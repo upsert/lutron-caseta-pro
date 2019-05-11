@@ -179,7 +179,7 @@ async def async_setup_bridge(hass, config, fname, bridge):
                 {CONF_HOST: bridge[CONF_HOST],
                  CONF_MAC: mac_address,
                  CONF_DEVICES: types[device_type],
-                 CONF_TRANSITION_TIME: transition_time }, config))
+                 CONF_TRANSITION_TIME: transition_time}, config))
 
 
 async def _patch_device_types(bridge, devices):

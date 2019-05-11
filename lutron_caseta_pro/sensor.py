@@ -21,8 +21,6 @@ from . import (Caseta, CONF_BUTTONS, ATTR_AREA_NAME,
 
 _LOGGER = logging.getLogger(__name__)
 
-DEPENDENCIES = ['lutron_caseta_pro']
-
 
 class CasetaData:
     """Data holder for a sensor."""

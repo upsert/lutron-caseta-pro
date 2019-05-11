@@ -13,8 +13,6 @@ from . import (Caseta, ATTR_SCENE_ID, CONF_SCENE_ID, DOMAIN as COMPONENT_DOMAIN)
 
 _LOGGER = logging.getLogger(__name__)
 
-DEPENDENCIES = ['lutron_caseta_pro']
-
 
 class CasetaData:
     """Data holder for a scene."""

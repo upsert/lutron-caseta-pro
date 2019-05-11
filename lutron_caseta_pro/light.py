@@ -14,14 +14,12 @@ from homeassistant.components.light import (
 from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_TYPE, CONF_NAME, CONF_ID)
 
 from . import (Caseta, DEFAULT_TYPE, ATTR_AREA_NAME, ATTR_INTEGRATION_ID,
-    CONF_AREA_NAME, CONF_TRANSITION_TIME, DOMAIN as COMPONENT_DOMAIN)
+               CONF_AREA_NAME, CONF_TRANSITION_TIME, DOMAIN as COMPONENT_DOMAIN)
 
 _LOGGER = logging.getLogger(__name__)
 
 # Max transition time supported is 4 hours
 _MAX_TRANSITION = 14400
-
-DEPENDENCIES = ['lutron_caseta_pro']
 
 
 class CasetaData:
@@ -70,7 +68,8 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     await bridge.open()
 
     data = CasetaData(bridge)
-    devices = [CasetaLight(light, data, discovery_info[CONF_MAC], discovery_info[CONF_TRANSITION_TIME])
+    devices = [CasetaLight(light, data, discovery_info[CONF_MAC],
+                           discovery_info[CONF_TRANSITION_TIME])
                for light in discovery_info[CONF_DEVICES]]
     data.set_devices(devices)
 
