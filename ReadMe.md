@@ -127,17 +127,18 @@ To update the Integration Report, delete the JSON Integration Report from your H
 
 To update the custom component, copy the latest files into `custom_components` directory and overwrite existing files. If you have no other custom components, you can remove the contents of the directory before copying the files.
 
-#### Automatic Updates with Custom Updater (Optional)
+#### Automatic Updates with HACS (Optional)
 
-For easy updates whenever a new version is released, use the [Home Assistant custom_updater component](https://github.com/custom-components/custom_updater/wiki/Installation) and [Tracker card](https://github.com/custom-cards/tracker-card). Once those are setup, add the following custom_updater config:
+For easy updates whenever a new version is released, use the [Home Assistant Community Store](https://github.com/custom-components/hacs) to install the custom component.
 
+HACS will download and install the custom component for you and keep track of updates.
+
+Once HACS is setup, go to Settings -> Custom Repositories and add the following Repository:
 ``` 
-custom_updater:
-  track:
-    - components
-  component_urls:
-    - https://raw.githubusercontent.com/upsert/lutron-caseta-pro/master/custom_updater.json
-``` 
+upsert/lutron-caseta-pro
+```
+
+And use type `Integration`. Once installed, add your settings to `configuration.yaml` as described above.
 
 ## Pico Remote Sensors
 All Pico remotes in the system will each get their own `sensor` in Home Assistant.
