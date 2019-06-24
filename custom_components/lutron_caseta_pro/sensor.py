@@ -44,25 +44,23 @@ class CasetaData:
         """Set the device list."""
         self._devices = devices
 
-    async def read_output(self, mode, integration, action, value):
+    async def read_output(self, mode, integration, component, value):
         """Receive output value from the bridge."""
         if mode == Caseta.DEVICE:
             for device in self._devices:
                 if device.integration == integration:
                     _LOGGER.debug("Got DEVICE value: %s %d %d %d", mode,
-                                  integration, action, value)
-                    state = 1 << action - device.minbutton
+                                  integration, component, value)
+                    state = 1 << component - device.minbutton
                     if value == Caseta.Button.PRESS:
                         _LOGGER.debug("Got Button Press, updating "
                                       "value to: %s", state)
-                        device.update_state(device.state | state)
+                        device.update_state(state)
                         await device.async_update_ha_state()
                     elif value == Caseta.Button.RELEASE:
-                        _LOGGER.debug("Got Button Release, updating value."
-                                      " Previous state: %s", device.state)
-                        device.update_state(device.state & ~state)
-                        _LOGGER.debug("State after button release: %s",
-                                      device.state)
+                        device.update_state(0)
+                        _LOGGER.debug("Got Button Release, updating "
+                                      "value to: %s", device.state)
                         await device.async_update_ha_state()
                     break
 
