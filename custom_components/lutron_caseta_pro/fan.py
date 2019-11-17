@@ -18,11 +18,11 @@ _LOGGER = logging.getLogger(__name__)
 
 SPEED_MEDIUM_HIGH = 'medium_high'
 SPEED_MAPPING = {
-    SPEED_OFF: 0,
-    SPEED_LOW: 25,
-    SPEED_MEDIUM: 50,
-    SPEED_MEDIUM_HIGH: 75,
-    SPEED_HIGH: 100
+    SPEED_OFF: 0.00,
+    SPEED_LOW: 25.10,
+    SPEED_MEDIUM: 50.20,
+    SPEED_MEDIUM_HIGH: 75.30,
+    SPEED_HIGH: 100.00
 }
 
 
@@ -190,15 +190,13 @@ class CasetaFan(FanEntity):
     def update_state(self, value):
         """Update internal state and fan speed."""
         self._is_on = value > SPEED_MAPPING[SPEED_OFF]
-        if value in range(SPEED_MAPPING[SPEED_MEDIUM_HIGH] + 1, SPEED_MAPPING[SPEED_HIGH] + 1):
+        if SPEED_MAPPING[SPEED_MEDIUM_HIGH] < value <= SPEED_MAPPING[SPEED_HIGH]:
             self._speed = SPEED_HIGH
-        elif value in range(SPEED_MAPPING[SPEED_MEDIUM] + 1, SPEED_MAPPING[SPEED_MEDIUM_HIGH] + 1):
-            # 51% - 55% are missing from Lutron integration protocol
-            # we will treat as medium_high
+        elif SPEED_MAPPING[SPEED_MEDIUM] < value <= SPEED_MAPPING[SPEED_MEDIUM_HIGH]:
             self._speed = SPEED_MEDIUM_HIGH
-        elif value in range(SPEED_MAPPING[SPEED_LOW] + 1, SPEED_MAPPING[SPEED_MEDIUM] + 1):
+        elif SPEED_MAPPING[SPEED_LOW] < value <= SPEED_MAPPING[SPEED_MEDIUM]:
             self._speed = SPEED_MEDIUM
-        elif value in range(SPEED_MAPPING[SPEED_OFF] + 1, SPEED_MAPPING[SPEED_LOW] + 1):
+        elif SPEED_MAPPING[SPEED_OFF] < value <= SPEED_MAPPING[SPEED_LOW]:
             self._speed = SPEED_LOW
         elif value == SPEED_MAPPING[SPEED_OFF]:
             self._speed = SPEED_OFF
