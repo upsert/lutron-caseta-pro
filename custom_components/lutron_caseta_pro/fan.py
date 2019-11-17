@@ -190,13 +190,13 @@ class CasetaFan(FanEntity):
     def update_state(self, value):
         """Update internal state and fan speed."""
         self._is_on = value > SPEED_MAPPING[SPEED_OFF]
-        if value > SPEED_MAPPING[SPEED_MEDIUM_HIGH] and value <= SPEED_MAPPING[SPEED_HIGH]:
+        if SPEED_MAPPING[SPEED_MEDIUM_HIGH] < value <= SPEED_MAPPING[SPEED_HIGH]:
             self._speed = SPEED_HIGH
-        elif value > SPEED_MAPPING[SPEED_MEDIUM] and value <= SPEED_MAPPING[SPEED_MEDIUM_HIGH]:
+        elif SPEED_MAPPING[SPEED_MEDIUM] < value <= SPEED_MAPPING[SPEED_MEDIUM_HIGH]:
             self._speed = SPEED_MEDIUM_HIGH
-        elif value > SPEED_MAPPING[SPEED_LOW] and value <= SPEED_MAPPING[SPEED_MEDIUM]:
+        elif SPEED_MAPPING[SPEED_LOW] < value <= SPEED_MAPPING[SPEED_MEDIUM]:
             self._speed = SPEED_MEDIUM
-        elif value > SPEED_MAPPING[SPEED_OFF] and value <= SPEED_MAPPING[SPEED_LOW]:
+        elif SPEED_MAPPING[SPEED_OFF] < value <= SPEED_MAPPING[SPEED_LOW]:
             self._speed = SPEED_LOW
         elif value == SPEED_MAPPING[SPEED_OFF]:
             self._speed = SPEED_OFF
