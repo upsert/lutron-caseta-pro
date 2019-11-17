@@ -55,7 +55,7 @@ class CasetaData:
         if mode == Caseta.OUTPUT:
             for device in self._devices:
                 if device.integration == integration:
-                    _LOGGER.debug("Got fan OUTPUT value: %s %d %d %f",
+                    _LOGGER.debug("Got fan OUTPUT value: %s %d %d %.2f",
                                   mode, integration, action, value)
                     if action == Caseta.Action.SET:
                         device.update_state(value)
@@ -178,7 +178,7 @@ class CasetaFan(FanEntity):
         if speed not in SPEED_MAPPING:
             _LOGGER.debug("Unknown speed %s, setting to %s", speed, SPEED_HIGH)
             self._speed = SPEED_HIGH
-        _LOGGER.debug("Writing fan OUTPUT value: %d %d %d",
+        _LOGGER.debug("Writing fan OUTPUT value: %d %d %.2f",
                       self._integration, Caseta.Action.SET, SPEED_MAPPING[self._speed])
         await self._data.caseta.write(Caseta.OUTPUT, self._integration, Caseta.Action.SET,
                                       SPEED_MAPPING[self._speed])
