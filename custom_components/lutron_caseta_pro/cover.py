@@ -146,18 +146,26 @@ class CasetaCover(CoverDevice):
         return self._position
 
     async def async_open_cover(self, **kwargs):
-        """Close the cover."""
-        # Parameters are Level, Fade, Delay
-        # Fade is ignored and Delay set to 0
+        """Open the cover."""
+        # Rasing must be used for STOP to work
         await self._data.caseta.write(Caseta.OUTPUT, self._integration,
-                                      Caseta.Action.SET, 100, 0, 0)
+                                      Caseta.Action.RAISING, None)
+        # When a Caseta.Action.SET action is sent to 100, the bridge
+        # will always send back the state right away to 100.
+        # We need to update the state ourself as the bridge
+        # will not do this on a Caseta.Action.RAISING
+        self.update_state(100)
 
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
-        # Parameters are Level, Fade, Delay
-        # Fade is ignored and Delay set to 0
+        # Lowering must be used for STOP to work
         await self._data.caseta.write(Caseta.OUTPUT, self._integration,
-                                      Caseta.Action.SET, 0, 0, 0)
+                                      Caseta.Action.LOWERING, None)
+        # When a Caseta.Action.SET action is sent to 0, the bridge
+        # will always send back the state right away to 0.
+        # We need to update the state ourself as the bridge
+        # will not do this on a Caseta.Action.LOWERING
+        self.update_state(0)
 
     async def async_set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
