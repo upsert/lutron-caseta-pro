@@ -165,8 +165,10 @@ class Casetify:
                 # do login
                 await self._read_until(b"login: ")
                 self.writer.write(username + b"\r\n")
+                await self.writer.drain()
                 await self._read_until(b"password: ")
                 self.writer.write(password + b"\r\n")
+                await self.writer.drain()
                 await self._read_until(b"GNET> ")
 
                 self._state = Casetify.State.Opened
@@ -186,7 +188,11 @@ class Casetify:
                     self._read_buffer = self._read_buffer[where + len(value):]
                     return True
             try:
-                self._read_buffer += await self.reader.read(READ_SIZE)
+                read_data = await self.reader.read(READ_SIZE)
+                if not len(read_data):
+                    _LOGGER.warning("Empty read from Lutron bridge (clean disconnect)")
+                    return False
+                self._read_buffer += read_data
             except OSError as err:
                 _LOGGER.warning("Error reading from Lutron bridge: %s", err)
                 return False
@@ -229,6 +235,7 @@ class Casetify:
                     data += ",{}".format(arg)
             try:
                 self.writer.write((data + "\r\n").encode())
+                await self.writer.drain()
             except OSError as err:
                 _LOGGER.warning("Error writing out to the Lutron bridge: %s", err)
 
@@ -243,6 +250,7 @@ class Casetify:
                 return
             self.writer.write("?{},{},{}\r\n".format(mode, integration,
                                                      action).encode())
+            await self.writer.drain()
 
     async def ping(self):
         """Ping the interface to keep the connection alive."""
@@ -250,3 +258,5 @@ class Casetify:
             if self._state != Casetify.State.Opened:
                 return
             self.writer.write(b"?SYSTEM,10\r\n")
+            await self.writer.drain()
+
