@@ -6,9 +6,9 @@ Provides access to the scenes defined in Lutron system.
 import logging
 
 from homeassistant.components.scene import Scene, DOMAIN
-from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID)
+from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID
 
-from . import (Caseta, ATTR_SCENE_ID, CONF_SCENE_ID, DOMAIN as COMPONENT_DOMAIN)
+from . import Caseta, ATTR_SCENE_ID, CONF_SCENE_ID, DOMAIN as COMPONENT_DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,8 +43,13 @@ class CasetaData:
         # only monitor integration ID 1 for scenes
         if mode == Caseta.DEVICE and integration == 1:
             # Expecting: ~DEVICE,1,Component Number,Action Number
-            _LOGGER.debug("Got scene DEVICE value: %s %d %d %d",
-                          mode, integration, component, action)
+            _LOGGER.debug(
+                "Got scene DEVICE value: %s %d %d %d",
+                mode,
+                integration,
+                component,
+                action,
+            )
             for device in self._devices:
                 if device.scene_id == component and action == Caseta.Button.PRESS:
                     _LOGGER.info("Scene %s activated.", component)
@@ -61,8 +66,10 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     await bridge.open()
 
     data = CasetaData(bridge, hass)
-    devices = [CasetaScene(scene, data, discovery_info[CONF_MAC])
-               for scene in discovery_info[CONF_DEVICES]]
+    devices = [
+        CasetaScene(scene, data, discovery_info[CONF_MAC])
+        for scene in discovery_info[CONF_DEVICES]
+    ]
     data.set_devices(devices)
 
     async_add_devices(devices)
@@ -99,10 +106,9 @@ class CasetaScene(Scene):
     def unique_id(self) -> str:
         """Return a unique ID."""
         if self._mac is not None:
-            return "{}_{}_{}_{}_{}".format(COMPONENT_DOMAIN,
-                                           DOMAIN, self._mac,
-                                           self._integration,
-                                           self._scene_id)
+            return "{}_{}_{}_{}_{}".format(
+                COMPONENT_DOMAIN, DOMAIN, self._mac, self._integration, self._scene_id
+            )
         return None
 
     @property
@@ -118,5 +124,6 @@ class CasetaScene(Scene):
 
     async def async_activate(self):
         """Activate the scene."""
-        await self._data.caseta.write(Caseta.DEVICE, self._integration,
-                                      self._scene_id, Caseta.Button.PRESS)
+        await self._data.caseta.write(
+            Caseta.DEVICE, self._integration, self._scene_id, Caseta.Button.PRESS
+        )

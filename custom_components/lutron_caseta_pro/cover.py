@@ -5,13 +5,24 @@ Provides shade functionality for Home Assistant.
 """
 import logging
 
-from homeassistant.components.cover import (CoverDevice, SUPPORT_OPEN,
-                                            SUPPORT_CLOSE, SUPPORT_STOP, ATTR_POSITION,
-                                            SUPPORT_SET_POSITION, DOMAIN)
-from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID)
+from homeassistant.components.cover import (
+    CoverDevice,
+    SUPPORT_OPEN,
+    SUPPORT_CLOSE,
+    SUPPORT_STOP,
+    ATTR_POSITION,
+    SUPPORT_SET_POSITION,
+    DOMAIN,
+)
+from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID
 
-from . import (Caseta, ATTR_AREA_NAME, CONF_AREA_NAME, ATTR_INTEGRATION_ID,
-               DOMAIN as COMPONENT_DOMAIN)
+from . import (
+    Caseta,
+    ATTR_AREA_NAME,
+    CONF_AREA_NAME,
+    ATTR_INTEGRATION_ID,
+    DOMAIN as COMPONENT_DOMAIN,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -47,8 +58,13 @@ class CasetaData:
         if mode == Caseta.OUTPUT:
             for device in self._devices:
                 if device.integration == integration:
-                    _LOGGER.debug("Got cover OUTPUT value: %s %d %d %f",
-                                  mode, integration, action, value)
+                    _LOGGER.debug(
+                        "Got cover OUTPUT value: %s %d %d %f",
+                        mode,
+                        integration,
+                        action,
+                        value,
+                    )
                     if action == Caseta.Action.SET:
                         # update zone level, e.g. 90.00
                         device.update_state(value)
@@ -66,8 +82,10 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     await bridge.open()
 
     data = CasetaData(bridge, hass)
-    devices = [CasetaCover(cover, data, discovery_info[CONF_MAC])
-               for cover in discovery_info[CONF_DEVICES]]
+    devices = [
+        CasetaCover(cover, data, discovery_info[CONF_MAC])
+        for cover in discovery_info[CONF_DEVICES]
+    ]
     data.set_devices(devices)
 
     async_add_devices(devices)
@@ -101,8 +119,9 @@ class CasetaCover(CoverDevice):
 
     async def query(self):
         """Query the bridge for the current state of the device."""
-        await self._data.caseta.query(Caseta.OUTPUT,
-                                      self._integration, Caseta.Action.SET)
+        await self._data.caseta.query(
+            Caseta.OUTPUT, self._integration, Caseta.Action.SET
+        )
 
     def update_state(self, new_position):
         """Update position value."""
@@ -117,9 +136,9 @@ class CasetaCover(CoverDevice):
     def unique_id(self) -> str:
         """Return a unique ID."""
         if self._mac is not None:
-            return "{}_{}_{}_{}".format(COMPONENT_DOMAIN,
-                                        DOMAIN, self._mac,
-                                        self._integration)
+            return "{}_{}_{}_{}".format(
+                COMPONENT_DOMAIN, DOMAIN, self._mac, self._integration
+            )
         return None
 
     @property
@@ -148,8 +167,9 @@ class CasetaCover(CoverDevice):
     async def async_open_cover(self, **kwargs):
         """Open the cover."""
         # Rasing must be used for STOP to work
-        await self._data.caseta.write(Caseta.OUTPUT, self._integration,
-                                      Caseta.Action.RAISING, None)
+        await self._data.caseta.write(
+            Caseta.OUTPUT, self._integration, Caseta.Action.RAISING, None
+        )
         # When a Caseta.Action.SET action is sent to 100, the bridge
         # will always send back the state right away to 100.
         # We need to update the state ourself as the bridge
@@ -159,8 +179,9 @@ class CasetaCover(CoverDevice):
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
         # Lowering must be used for STOP to work
-        await self._data.caseta.write(Caseta.OUTPUT, self._integration,
-                                      Caseta.Action.LOWERING, None)
+        await self._data.caseta.write(
+            Caseta.OUTPUT, self._integration, Caseta.Action.LOWERING, None
+        )
         # When a Caseta.Action.SET action is sent to 0, the bridge
         # will always send back the state right away to 0.
         # We need to update the state ourself as the bridge
@@ -176,15 +197,15 @@ class CasetaCover(CoverDevice):
                 _LOGGER.warning("Tried to set cover position to less than 0.")
                 position = 0
             if position > 100:
-                _LOGGER.warning("Tried to set cover position to greater"
-                                " than maximum value 100.")
+                _LOGGER.warning(
+                    "Tried to set cover position to greater than maximum value 100."
+                )
                 position = 100
             # Parameters are Level, Fade, Delay
             # Fade is ignored and Delay set to 0
-            await self._data.caseta.write(Caseta.OUTPUT,
-                                          self._integration,
-                                          Caseta.Action.SET, position,
-                                          0, 0)
+            await self._data.caseta.write(
+                Caseta.OUTPUT, self._integration, Caseta.Action.SET, position, 0, 0
+            )
 
     @property
     def supported_features(self):
@@ -193,5 +214,6 @@ class CasetaCover(CoverDevice):
 
     async def async_stop_cover(self, **kwargs):
         """Stop raising or lowering the shade."""
-        await self._data.caseta.write(Caseta.OUTPUT, self._integration,
-                                      Caseta.Action.STOP, None)
+        await self._data.caseta.write(
+            Caseta.OUTPUT, self._integration, Caseta.Action.STOP, None
+        )

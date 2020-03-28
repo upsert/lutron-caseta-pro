@@ -7,13 +7,17 @@ depending on the button press.
 import logging
 
 from homeassistant.components.sensor import DOMAIN
-from homeassistant.const import (CONF_DEVICES, CONF_HOST, CONF_MAC,
-                                 CONF_NAME, CONF_ID)
+from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID
 from homeassistant.helpers.entity import Entity
 
-from . import (Caseta, CONF_BUTTONS, ATTR_AREA_NAME,
-               CONF_AREA_NAME, ATTR_INTEGRATION_ID,
-               DOMAIN as COMPONENT_DOMAIN)
+from . import (
+    Caseta,
+    CONF_BUTTONS,
+    ATTR_AREA_NAME,
+    CONF_AREA_NAME,
+    ATTR_INTEGRATION_ID,
+    DOMAIN as COMPONENT_DOMAIN,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,18 +50,23 @@ class CasetaData:
         if mode == Caseta.DEVICE:
             for device in self._devices:
                 if device.integration == integration:
-                    _LOGGER.debug("Got DEVICE value: %s %d %d %d", mode,
-                                  integration, component, value)
+                    _LOGGER.debug(
+                        "Got DEVICE value: %s %d %d %d",
+                        mode,
+                        integration,
+                        component,
+                        value,
+                    )
                     state = 1 << component - device.minbutton
                     if value == Caseta.Button.PRESS:
-                        _LOGGER.debug("Got Button Press, updating "
-                                      "value to: %s", state)
+                        _LOGGER.debug("Got Button Press, updating value to: %s", state)
                         device.update_state(state)
                         await device.async_update_ha_state()
                     elif value == Caseta.Button.RELEASE:
                         device.update_state(0)
-                        _LOGGER.debug("Got Button Release, updating "
-                                      "value to: %s", device.state)
+                        _LOGGER.debug(
+                            "Got Button Release, updating value to: %s", device.state
+                        )
                         await device.async_update_ha_state()
                     break
 
@@ -71,8 +80,10 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     await bridge.open()
 
     data = CasetaData(bridge, hass)
-    devices = [CasetaPicoRemote(pico, data, discovery_info[CONF_MAC])
-               for pico in discovery_info[CONF_DEVICES]]
+    devices = [
+        CasetaPicoRemote(pico, data, discovery_info[CONF_MAC])
+        for pico in discovery_info[CONF_DEVICES]
+    ]
     data.set_devices(devices)
 
     async_add_devices(devices)
@@ -115,9 +126,9 @@ class CasetaPicoRemote(Entity):
     def unique_id(self) -> str:
         """Return a unique ID."""
         if self._mac is not None:
-            return "{}_{}_{}_{}".format(COMPONENT_DOMAIN,
-                                        DOMAIN, self._mac,
-                                        self._integration)
+            return "{}_{}_{}_{}".format(
+                COMPONENT_DOMAIN, DOMAIN, self._mac, self._integration
+            )
         return None
 
     @property

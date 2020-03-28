@@ -15,11 +15,10 @@ import os.path
 import weakref
 
 import voluptuous as vol
-from homeassistant.const import (CONF_ID, CONF_DEVICES, CONF_HOST, CONF_TYPE, CONF_MAC)
-from homeassistant.components.light import (VALID_TRANSITION)
+from homeassistant.const import CONF_ID, CONF_DEVICES, CONF_HOST, CONF_TYPE, CONF_MAC
+from homeassistant.components.light import VALID_TRANSITION
 from homeassistant.helpers import discovery
-from homeassistant.helpers.config_validation import ensure_list, string, \
-    positive_int
+from homeassistant.helpers.config_validation import ensure_list, string, positive_int
 
 # pylint: disable=relative-beyond-top-level
 from . import casetify
@@ -42,23 +41,34 @@ CONF_TRANSITION_TIME = "default_transition_seconds"
 CONF_FAN = "fan"
 DEFAULT_TYPE = "light"
 
-CONFIG_SCHEMA = vol.Schema({
-    DOMAIN: vol.Schema({
-        vol.Required(CONF_BRIDGES): vol.All(ensure_list, [
+CONFIG_SCHEMA = vol.Schema(
+    {
+        DOMAIN: vol.Schema(
             {
-                vol.Required(CONF_HOST): string,
-                vol.Optional(CONF_MAC): string,
-                vol.Optional(CONF_TRANSITION_TIME): VALID_TRANSITION,
-                vol.Optional(CONF_SWITCH): vol.All(ensure_list,
-                                                   [positive_int]),
-                vol.Optional(CONF_COVER): vol.All(ensure_list,
-                                                  [positive_int]),
-                vol.Optional(CONF_FAN): vol.All(ensure_list,
-                                                [positive_int])
+                vol.Required(CONF_BRIDGES): vol.All(
+                    ensure_list,
+                    [
+                        {
+                            vol.Required(CONF_HOST): string,
+                            vol.Optional(CONF_MAC): string,
+                            vol.Optional(CONF_TRANSITION_TIME): VALID_TRANSITION,
+                            vol.Optional(CONF_SWITCH): vol.All(
+                                ensure_list, [positive_int]
+                            ),
+                            vol.Optional(CONF_COVER): vol.All(
+                                ensure_list, [positive_int]
+                            ),
+                            vol.Optional(CONF_FAN): vol.All(
+                                ensure_list, [positive_int]
+                            ),
+                        }
+                    ],
+                ),
             }
-        ]),
-    }),
-}, extra=vol.ALLOW_EXTRA)
+        ),
+    },
+    extra=vol.ALLOW_EXTRA,
+)
 
 
 async def request_configuration(hass, config, host, bridge):
@@ -66,19 +76,21 @@ async def request_configuration(hass, config, host, bridge):
     configurator = hass.components.configurator
 
     if host in _CONFIGURING:
-        configurator.notify_errors(_CONFIGURING[host],
-                                   "Failed to process Lutron Integration"
-                                   " Report, please try again.")
+        configurator.notify_errors(
+            _CONFIGURING[host],
+            "Failed to process Lutron Integration Report, please try again.",
+        )
         return
 
     def setup_callback(data):
         """Set up the callback for configuration."""
         _LOGGER.debug("Entering callback for configuring host %s", host)
         # get the integration report from callback data
-        integration_report_data = data.get('integration_report')
+        integration_report_data = data.get("integration_report")
         if not integration_report_data:
-            configurator.notify_errors(request_id,
-                                       "Error reading the Integration Report. Please try again.")
+            configurator.notify_errors(
+                request_id, "Error reading the Integration Report. Please try again."
+            )
             return False
 
         # parse JSON integration report
@@ -86,16 +98,18 @@ async def request_configuration(hass, config, host, bridge):
 
         # check for top-level object
         if not json_int_report["LIPIdList"]:
-            configurator.notify_errors(request_id,
-                                       "Error parsing Integration Report. "
-                                       "Expecting it to start "
-                                       "with 'LIPIdList'.")
+            configurator.notify_errors(
+                request_id,
+                "Error parsing Integration Report. "
+                "Expecting it to start "
+                "with 'LIPIdList'.",
+            )
             return False
 
         str_int_report = json.dumps(json_int_report, indent=2)
         fname = get_config_file(hass, host)
         _LOGGER.debug("Writing out JSON integration report to %s", fname)
-        with open(fname, 'w', encoding='utf-8') as outfile:
+        with open(fname, "w", encoding="utf-8") as outfile:
             outfile.write(str_int_report)
 
         # run setup
@@ -112,8 +126,10 @@ async def request_configuration(hass, config, host, bridge):
         name="Lutron Caseta Smart Bridge PRO / Ra2 Select",
         callback=setup_callback,
         description="Enter the contents of the Integration Report:",
-        fields=[{'id': 'integration_report', 'name': 'Integration Report', 'type': 'string'}],
-        submit_caption="Submit"
+        fields=[
+            {"id": "integration_report", "name": "Integration Report", "type": "string"}
+        ],
+        submit_caption="Submit",
     )
     _CONFIGURING[host] = request_id
 
@@ -133,8 +149,11 @@ async def async_setup(hass, config):
 
             # check if the file exists
             if not os.path.exists(fname) or not os.path.isfile(fname):
-                _LOGGER.info("Integration Report for host %s not found at location %s",
-                             host, fname)
+                _LOGGER.info(
+                    "Integration Report for host %s not found at location %s",
+                    host,
+                    fname,
+                )
                 hass.async_add_job(request_configuration, hass, config, host, bridge)
             else:
                 _LOGGER.debug("Loading Integration Report %s", fname)
@@ -155,7 +174,14 @@ async def async_setup_bridge(hass, config, fname, bridge):
     _LOGGER.debug("Patched device list %s", devices)
 
     # sort devices based on device types
-    types = {"sensor": [], "switch": [], "light": [], "cover": [], "scene": [], "fan": []}
+    types = {
+        "sensor": [],
+        "switch": [],
+        "light": [],
+        "cover": [],
+        "scene": [],
+        "fan": [],
+    }
     for device in devices:
         types[device["type"]].append(device)
 
@@ -175,11 +201,18 @@ async def async_setup_bridge(hass, config, fname, bridge):
         _LOGGER.debug("Loading platform %s", component)
         hass.async_add_job(
             discovery.async_load_platform(
-                hass, component, DOMAIN,
-                {CONF_HOST: bridge[CONF_HOST],
-                 CONF_MAC: mac_address,
-                 CONF_DEVICES: types[device_type],
-                 CONF_TRANSITION_TIME: transition_time}, config))
+                hass,
+                component,
+                DOMAIN,
+                {
+                    CONF_HOST: bridge[CONF_HOST],
+                    CONF_MAC: mac_address,
+                    CONF_DEVICES: types[device_type],
+                    CONF_TRANSITION_TIME: transition_time,
+                },
+                config,
+            )
+        )
 
 
 async def _patch_device_types(bridge, devices):
@@ -199,9 +232,11 @@ async def _patch_device_types(bridge, devices):
                         found = True
                         break
                 if not found:
-                    _LOGGER.warning("Integration ID %d for type %s not found"
-                                    " in the Integration Report.",
-                                    integration_id, device_type)
+                    _LOGGER.warning(
+                        "Integration ID %d for type %s not found in the Integration Report.",
+                        integration_id,
+                        device_type,
+                    )
 
 
 # pylint: disable=too-few-public-methods
@@ -256,8 +291,14 @@ class Caseta:
             if mode is None:
                 self._hass.loop.create_task(self._read_next())
                 return
-            _LOGGER.debug("Read value for host %s: %s %d %d %f",
-                          self._host, mode, integration, action, value)
+            _LOGGER.debug(
+                "Read value for host %s: %s %d %d %f",
+                self._host,
+                mode,
+                integration,
+                action,
+                value,
+            )
             # walk callbacks
             for callback in self._callbacks:
                 await callback.call(mode, integration, action, value)
@@ -279,7 +320,9 @@ class Caseta:
 
             # check the connection, reconnect if needed
             if not self._casetify.is_connected():
-                _LOGGER.debug("Lutron bridge not connected. Scheduling a reconnect attempt.")
+                _LOGGER.debug(
+                    "Lutron bridge not connected. Scheduling a reconnect attempt."
+                )
                 self._hass.loop.create_task(self._reconnect())
 
             self._hass.loop.create_task(self._ping())
