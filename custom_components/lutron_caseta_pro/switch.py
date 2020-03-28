@@ -1,8 +1,7 @@
 """
 Platform for Lutron switches.
 
-Author: upsert (https://github.com/upsert)
-Based on work by jhanssen (https://github.com/jhanssen/home-assistant/tree/caseta-0.40)
+Provides switch functionality for Home Assistant.
 """
 import logging
 
@@ -54,7 +53,7 @@ class CasetaData:
 
 # pylint: disable=unused-argument
 async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
-    """Initialize the platform."""
+    """Configure the platform."""
     if discovery_info is None:
         return
     bridge = Caseta(discovery_info[CONF_HOST])

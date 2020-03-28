@@ -1,8 +1,8 @@
 """
 Lutron Caseta Smart Bridge PRO and Ra2 Select Home Assistant Component.
 
-Original Author: jhanssen
-Source: https://github.com/jhanssen/home-assistant/tree/caseta-0.40
+Based on original code from jhanssen
+https://github.com/jhanssen/home-assistant/tree/caseta-0.40
 
 Additional Authors:
 upsert (https://github.com/upsert)
@@ -208,7 +208,7 @@ async def _patch_device_types(bridge, devices):
 class Caseta:
     """Caseta component class."""
 
-    class CallbackHolder(object):
+    class CallbackHolder:
         """Callback holder."""
 
         def __init__(self, callback):
@@ -271,7 +271,6 @@ class Caseta:
                     _LOGGER.debug("Waiting to reconnect.")
                 else:
                     _LOGGER.debug("Re-connected to the Lutron bridge.")
-                    # TODO update state for all devices
 
         async def _ping(self):
             """Send a ping to the Caseta interface."""

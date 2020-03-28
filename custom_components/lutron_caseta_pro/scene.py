@@ -1,8 +1,7 @@
 """
 Platform for Lutron scenes.
 
-Author: upsert (https://github.com/upsert)
-Based on work by jhanssen (https://github.com/jhanssen/home-assistant/tree/caseta-0.40)
+Provides access to the scenes defined in Lutron system.
 """
 import logging
 
@@ -18,6 +17,7 @@ class CasetaData:
     """Data holder for a scene."""
 
     def __init__(self, caseta, hass):
+        """Initialize the data holder."""
         self._caseta = caseta
         self._hass = hass
         self._devices = []
@@ -54,7 +54,7 @@ class CasetaData:
 
 # pylint: disable=unused-argument
 async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
-    """Setup the platform."""
+    """Configure the platform."""
     if discovery_info is None:
         return
     bridge = Caseta(discovery_info[CONF_HOST])

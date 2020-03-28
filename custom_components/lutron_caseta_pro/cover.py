@@ -1,8 +1,7 @@
 """
 Platform for Lutron shades.
 
-Author: upsert (https://github.com/upsert)
-Based on work by jhanssen (https://github.com/jhanssen/home-assistant/tree/caseta-0.40)
+Provides shade functionality for Home Assistant.
 """
 import logging
 
@@ -21,6 +20,7 @@ class CasetaData:
     """Data holder for a shade."""
 
     def __init__(self, caseta, hass):
+        """Initialize the data holder."""
         self._caseta = caseta
         self._hass = hass
         self._devices = []
@@ -59,7 +59,7 @@ class CasetaData:
 
 # pylint: disable=unused-argument
 async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
-    """Setup the platform."""
+    """Configure the platform."""
     if discovery_info is None:
         return
     bridge = Caseta(discovery_info[CONF_HOST])
@@ -100,7 +100,7 @@ class CasetaCover(CoverDevice):
         await self.query()
 
     async def query(self):
-        """Queries the bridge for the current state of the device."""
+        """Query the bridge for the current state of the device."""
         await self._data.caseta.query(Caseta.OUTPUT,
                                       self._integration, Caseta.Action.SET)
 
@@ -188,6 +188,7 @@ class CasetaCover(CoverDevice):
 
     @property
     def supported_features(self):
+        """Flag supported features."""
         return SUPPORT_OPEN | SUPPORT_CLOSE | SUPPORT_STOP | SUPPORT_SET_POSITION
 
     async def async_stop_cover(self, **kwargs):

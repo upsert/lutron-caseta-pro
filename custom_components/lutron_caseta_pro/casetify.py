@@ -1,15 +1,8 @@
 """
-Interface module for Lutron Caseta Smart Bridge PRO
-and Ra2 Select Main Repeater.
+Interface module for Lutron Caseta Smart Bridge PRO and Ra2 Select Main Repeater.
 
 This module uses the Telnet interface which must be
 enabled through the integration menu in the mobile app.
-
-Original Author: jhanssen
-Source: https://github.com/jhanssen/home-assistant/tree/caseta-0.40
-
-Additional Authors:
-upsert (https://github.com/upsert)
 """
 
 import asyncio
@@ -134,7 +127,7 @@ class Casetify:
         self.reader, self.writer = None, None
 
     def is_connected(self):
-        """Returns if the connection is open."""
+        """Return if the connection is open."""
         return self._state == Casetify.State.Opened
 
     async def open(self, host, port=23, username=DEFAULT_USER,
@@ -189,7 +182,7 @@ class Casetify:
                     return True
             try:
                 read_data = await self.reader.read(READ_SIZE)
-                if not len(read_data):
+                if not read_data:
                     _LOGGER.warning("Empty read from Lutron bridge (clean disconnect)")
                     return False
                 self._read_buffer += read_data
@@ -207,9 +200,8 @@ class Casetify:
                 # 1 = mode, 2 = integration number,
                 # 3 = action number, 4 = value
                 try:
-                    return match.group(1).decode("utf-8"), \
-                           int(match.group(2)), int(match.group(3)), \
-                           float(match.group(4))
+                    return match.group(1).decode("utf-8"), int(match.group(2)), int(match.group(3)), float(
+                        match.group(4))
                 except ValueError:
                     print("Exception in ", match.group(0))
         if match is False:
@@ -259,4 +251,3 @@ class Casetify:
                 return
             self.writer.write(b"?SYSTEM,10\r\n")
             await self.writer.drain()
-

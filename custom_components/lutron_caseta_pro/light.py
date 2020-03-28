@@ -1,11 +1,7 @@
 """
 Platform for Lutron dimmers for lights.
 
-Original Author: jhanssen
-Source: https://github.com/jhanssen/home-assistant/tree/caseta-0.40
-
-Additional Authors:
-upsert (https://github.com/upsert)
+Provides dimmable light functionality for Home Assistant.
 """
 import logging
 
@@ -61,7 +57,7 @@ class CasetaData:
 
 # pylint: disable=unused-argument
 async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
-    """Initialize the platform."""
+    """Configure the platform."""
     if discovery_info is None:
         return
     bridge = Caseta(discovery_info[CONF_HOST])
