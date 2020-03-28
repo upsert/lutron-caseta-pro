@@ -250,6 +250,7 @@ class Casetify:
                 return
             self.writer.write("?{},{},{}\r\n".format(mode, integration,
                                                      action).encode())
+            await self.writer.drain()
 
     async def ping(self):
         """Ping the interface to keep the connection alive."""
