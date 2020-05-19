@@ -4,5 +4,5 @@
   "documentation": "https://github.com/upsert/lutron-caseta-pro",
   "dependencies": [],
   "codeowners": ["@upsert"],
-  "requirements": []
+  "requirements": ["get-mac>=0.8.2"]
 }
