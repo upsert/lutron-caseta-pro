@@ -189,7 +189,7 @@ async def async_setup_bridge(hass, config, fname, bridge):
     # load the bridge's MAC address used for generating unique IDs for each device
     host = bridge[CONF_HOST]
     mac_address = getmac.get_mac_address(ip=host)
-    _LOGGER.error(f"Discovered MAC address {mac_address}")
+    _LOGGER.verbose(f"Discovered Lutron bridge MAC address {mac_address}")
 
     # Retain the ability for the user to override the MAC address, since if a physical Lutron Bridge
     # has to be  replaced for some reason (defective), setting this to the old MAC address would allow
@@ -199,10 +199,7 @@ async def async_setup_bridge(hass, config, fname, bridge):
     if CONF_MAC in bridge:
         if mac_address != bridge[CONF_MAC]:
             _LOGGER.info("Overriding Lutron bridge's MAC address {mac_address} with configuration mac={bridge[CONF_MAC]}")
-        mac_address = bridge[CONF_MAC]
-
-    if not mac_address:
-        _LOGGER.error(f"No MAC address for Lutron bridge, will not be able to set unique ids for devices: {bridge}")
+            mac_address = bridge[CONF_MAC]
 
     # Load default transition time, if present.
     transition_time = None
