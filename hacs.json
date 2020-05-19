@@ -1,5 +1,5 @@
 {
-  "name": "Lutron Caseta Smart Bridge PRO / RA2 Select",
+  "name": "Lutron Caseta Smart Bridge PRO/RA2 Select",
   "domains": [ "cover", "fan", "light", "scene", "sensor", "switch" ],
   "render_readme": true
 }
