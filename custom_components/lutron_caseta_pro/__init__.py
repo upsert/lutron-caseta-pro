@@ -191,6 +191,9 @@ async def async_setup_bridge(hass, config, fname, bridge):
     if CONF_MAC in bridge:
         mac_address = bridge[CONF_MAC]
 
+    if not mac_address:
+        _LOGGER.warning(f"No MAC address for Lutron bridge, will not be able to set unique ids for devices: {bridge}")
+
     # Load default transition time, if present.
     transition_time = None
     if CONF_TRANSITION_TIME in bridge:
