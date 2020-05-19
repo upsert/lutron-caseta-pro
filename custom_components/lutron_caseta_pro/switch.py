@@ -69,8 +69,6 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     bridge = Caseta(discovery_info[CONF_HOST])
     await bridge.open()
 
-    _LOGGER.info(f"Found Lutron discovery info {discovery_info}")
-
     data = CasetaData(bridge)
     devices = [
         CasetaSwitch(switch, data, discovery_info[CONF_MAC])
