@@ -13,8 +13,7 @@ import json
 import logging
 import os.path
 import weakref
-
-from getmac import get_mac_address
+import getmac
 
 import voluptuous as vol
 from homeassistant.const import CONF_ID, CONF_DEVICES, CONF_HOST, CONF_TYPE, CONF_MAC
@@ -30,7 +29,6 @@ _CONFIGURING = {}
 
 DOMAIN = "lutron_caseta_pro"
 
-ATTR_MAC = "mac"
 ATTR_AREA_NAME = "area_name"
 ATTR_INTEGRATION_ID = "integration_id"
 ATTR_SCENE_ID = "scene_id"
@@ -190,7 +188,7 @@ async def async_setup_bridge(hass, config, fname, bridge):
 
     # load the bridge's MAC address used for generating unique IDs for each device
     host = bridge[CONF_HOST]
-    mac_address = get_mac_address(ip=host)
+    mac_address = getmac.get_mac_address(ip=host)
     _LOGGER.error(f"Discovered MAC address {mac_address}")
 
     # Retain the ability for the user to override the MAC address, since if a physical Lutron Bridge

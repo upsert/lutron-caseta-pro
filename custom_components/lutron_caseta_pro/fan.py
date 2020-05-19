@@ -22,7 +22,6 @@ from . import (
     ATTR_AREA_NAME,
     CONF_AREA_NAME,
     ATTR_INTEGRATION_ID,
-    ATTR_MAC,
     DOMAIN as COMPONENT_DOMAIN,
 )
 
@@ -162,8 +161,7 @@ class CasetaFan(FanEntity):
     @property
     def device_state_attributes(self):
         """Return device specific state attributes."""
-        attr = { ATTR_INTEGRATION_ID: self._integration,
-                 ATTR_MAC: self._mac }
+        attr = {ATTR_INTEGRATION_ID: self._integration}
         if self._area_name:
             attr[ATTR_AREA_NAME] = self._area_name
         return attr
