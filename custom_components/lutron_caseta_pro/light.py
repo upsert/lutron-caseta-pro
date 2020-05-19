@@ -27,6 +27,7 @@ from . import (
     DEFAULT_TYPE,
     ATTR_AREA_NAME,
     ATTR_INTEGRATION_ID,
+    ATTR_MAC,
     CONF_AREA_NAME,
     CONF_TRANSITION_TIME,
     DOMAIN as COMPONENT_DOMAIN,
@@ -36,7 +37,6 @@ _LOGGER = logging.getLogger(__name__)
 
 # Max transition time supported is 4 hours
 _MAX_TRANSITION = 14400
-
 
 class CasetaData:
     """Data holder for a light."""
@@ -87,6 +87,8 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
         return
     bridge = Caseta(discovery_info[CONF_HOST])
     await bridge.open()
+
+    LOG.info(f"Found Lutron discovery info {discovery_info}")
 
     data = CasetaData(bridge)
     devices = [
@@ -181,7 +183,8 @@ class CasetaLight(Light):
     @property
     def device_state_attributes(self):
         """Return device specific state attributes."""
-        attr = {ATTR_INTEGRATION_ID: self._integration}
+        attr = { ATTR_INTEGRATION_ID: self._integration,
+                 ATTR_MAC: self._mac }
         if self._area_name:
             attr[ATTR_AREA_NAME] = self._area_name
         return attr

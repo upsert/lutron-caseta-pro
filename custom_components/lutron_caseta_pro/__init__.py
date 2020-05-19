@@ -28,6 +28,7 @@ _CONFIGURING = {}
 
 DOMAIN = "lutron_caseta_pro"
 
+ATTR_MAC = "mac"
 ATTR_AREA_NAME = "area_name"
 ATTR_INTEGRATION_ID = "integration_id"
 ATTR_SCENE_ID = "scene_id"
