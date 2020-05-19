@@ -170,6 +170,7 @@ class CasetaLight(Light):
             return "{}_{}_{}_{}".format(
                 COMPONENT_DOMAIN, DOMAIN, self._mac, self._integration
             )
+        _LOGGER.warning(f"No MAC based unique id for {self._name} {self._integration}!!!!")
         return None
 
     @property

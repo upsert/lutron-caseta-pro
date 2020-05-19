@@ -198,7 +198,7 @@ async def async_setup_bridge(hass, config, fname, bridge):
     # possible to get a unique identifier from the ACTUAL end physical device (e.g. switch).
     if CONF_MAC in bridge:
         if mac_address != bridge[CONF_MAC]:
-            _LOGGER.info("Overriding Lutron bridge's MAC address {mac_address} with configuration mac={bridge[CONF_MAC]}")
+            _LOGGER.info(f"Overriding Lutron bridge's MAC address {mac_address} with configuration mac={bridge[CONF_MAC]}")
             mac_address = bridge[CONF_MAC]
 
     # Load default transition time, if present.
