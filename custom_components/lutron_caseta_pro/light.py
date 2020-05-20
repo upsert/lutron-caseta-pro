@@ -10,7 +10,7 @@ from homeassistant.components.light import (
     ATTR_TRANSITION,
     SUPPORT_BRIGHTNESS,
     SUPPORT_TRANSITION,
-    Light,
+    LightEntity,
     DOMAIN,
 )
 from homeassistant.const import (
@@ -130,7 +130,7 @@ def _format_transition(transition) -> str:
 
 
 # pylint: disable=too-many-instance-attributes
-class CasetaLight(Light):
+class CasetaLight(LightEntity):
     """Representation of a Lutron light."""
 
     def __init__(self, light, data, mac, transition):

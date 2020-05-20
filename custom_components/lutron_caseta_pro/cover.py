@@ -6,7 +6,7 @@ Provides shade functionality for Home Assistant.
 import logging
 
 from homeassistant.components.cover import (
-    CoverDevice,
+    CoverEntity,
     SUPPORT_OPEN,
     SUPPORT_CLOSE,
     SUPPORT_STOP,
@@ -97,7 +97,7 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     bridge.start(hass)
 
 
-class CasetaCover(CoverDevice):
+class CasetaCover(CoverEntity):
     """Representation of a Lutron shade."""
 
     def __init__(self, cover, data, mac):

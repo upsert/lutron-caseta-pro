@@ -5,7 +5,7 @@ Provides switch functionality for Home Assistant.
 """
 import logging
 
-from homeassistant.components.switch import SwitchDevice, DOMAIN
+from homeassistant.components.switch import SwitchEntity, DOMAIN
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID
 
 from . import (
@@ -85,7 +85,7 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     bridge.start(hass)
 
 
-class CasetaSwitch(SwitchDevice):
+class CasetaSwitch(SwitchEntity):
     """Representation of a Lutron switch."""
 
     def __init__(self, switch, data, mac):
