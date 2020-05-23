@@ -1,6 +1,5 @@
 {
   "name": "Lutron Caseta Smart Bridge PRO/RA2 Select",
   "domains": [ "cover", "fan", "light", "scene", "sensor", "switch" ],
-  "homeassistant": "0.110",
-  "render_readme": true
+  "homeassistant": "0.110"
 }
