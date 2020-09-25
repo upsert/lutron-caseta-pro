@@ -15,10 +15,10 @@ import os.path
 import weakref
 
 import voluptuous as vol
-from homeassistant.const import CONF_ID, CONF_DEVICES, CONF_HOST, CONF_TYPE, CONF_MAC
 from homeassistant.components.light import VALID_TRANSITION
+from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_TYPE
 from homeassistant.helpers import discovery
-from homeassistant.helpers.config_validation import ensure_list, string, positive_int
+from homeassistant.helpers.config_validation import ensure_list, positive_int, string
 
 # pylint: disable=relative-beyond-top-level
 from . import casetify

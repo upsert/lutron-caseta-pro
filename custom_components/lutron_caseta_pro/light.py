@@ -8,29 +8,29 @@ import logging
 from homeassistant.components.light import (
     ATTR_BRIGHTNESS,
     ATTR_TRANSITION,
+    DOMAIN,
     SUPPORT_BRIGHTNESS,
     SUPPORT_TRANSITION,
     LightEntity,
-    DOMAIN,
 )
 from homeassistant.const import (
     CONF_DEVICES,
     CONF_HOST,
-    CONF_MAC,
-    CONF_TYPE,
-    CONF_NAME,
     CONF_ID,
+    CONF_MAC,
+    CONF_NAME,
+    CONF_TYPE,
 )
 
 from . import (
-    Caseta,
-    DEFAULT_TYPE,
     ATTR_AREA_NAME,
     ATTR_INTEGRATION_ID,
     CONF_AREA_NAME,
     CONF_TRANSITION_TIME,
-    DOMAIN as COMPONENT_DOMAIN,
+    DEFAULT_TYPE,
 )
+from . import DOMAIN as COMPONENT_DOMAIN
+from . import Caseta
 
 _LOGGER = logging.getLogger(__name__)
 
