@@ -6,23 +6,19 @@ Provides shade functionality for Home Assistant.
 import logging
 
 from homeassistant.components.cover import (
-    CoverEntity,
-    SUPPORT_OPEN,
-    SUPPORT_CLOSE,
-    SUPPORT_STOP,
     ATTR_POSITION,
-    SUPPORT_SET_POSITION,
     DOMAIN,
+    SUPPORT_CLOSE,
+    SUPPORT_OPEN,
+    SUPPORT_SET_POSITION,
+    SUPPORT_STOP,
+    CoverEntity,
 )
-from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID
+from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 
-from . import (
-    Caseta,
-    ATTR_AREA_NAME,
-    CONF_AREA_NAME,
-    ATTR_INTEGRATION_ID,
-    DOMAIN as COMPONENT_DOMAIN,
-)
+from . import ATTR_AREA_NAME, ATTR_INTEGRATION_ID, CONF_AREA_NAME
+from . import DOMAIN as COMPONENT_DOMAIN
+from . import Caseta
 
 _LOGGER = logging.getLogger(__name__)
 

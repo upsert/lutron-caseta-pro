@@ -5,10 +5,12 @@ Provides access to the scenes defined in Lutron system.
 """
 import logging
 
-from homeassistant.components.scene import Scene, DOMAIN
-from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID
+from homeassistant.components.scene import DOMAIN, Scene
+from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 
-from . import Caseta, ATTR_SCENE_ID, CONF_SCENE_ID, DOMAIN as COMPONENT_DOMAIN
+from . import ATTR_SCENE_ID, CONF_SCENE_ID
+from . import DOMAIN as COMPONENT_DOMAIN
+from . import Caseta
 
 _LOGGER = logging.getLogger(__name__)
 

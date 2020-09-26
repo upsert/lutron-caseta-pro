@@ -5,16 +5,12 @@ Provides switch functionality for Home Assistant.
 """
 import logging
 
-from homeassistant.components.switch import SwitchEntity, DOMAIN
-from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID
+from homeassistant.components.switch import DOMAIN, SwitchEntity
+from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 
-from . import (
-    Caseta,
-    ATTR_AREA_NAME,
-    CONF_AREA_NAME,
-    ATTR_INTEGRATION_ID,
-    DOMAIN as COMPONENT_DOMAIN,
-)
+from . import ATTR_AREA_NAME, ATTR_INTEGRATION_ID, CONF_AREA_NAME
+from . import DOMAIN as COMPONENT_DOMAIN
+from . import Caseta
 
 _LOGGER = logging.getLogger(__name__)
 

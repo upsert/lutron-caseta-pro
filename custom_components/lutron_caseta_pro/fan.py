@@ -7,23 +7,19 @@ import asyncio
 import logging
 
 from homeassistant.components.fan import (
+    DOMAIN,
+    SPEED_HIGH,
     SPEED_LOW,
     SPEED_MEDIUM,
-    SPEED_HIGH,
     SPEED_OFF,
     SUPPORT_SET_SPEED,
     FanEntity,
-    DOMAIN,
 )
-from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID
+from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 
-from . import (
-    Caseta,
-    ATTR_AREA_NAME,
-    CONF_AREA_NAME,
-    ATTR_INTEGRATION_ID,
-    DOMAIN as COMPONENT_DOMAIN,
-)
+from . import ATTR_AREA_NAME, ATTR_INTEGRATION_ID, CONF_AREA_NAME
+from . import DOMAIN as COMPONENT_DOMAIN
+from . import Caseta
 
 _LOGGER = logging.getLogger(__name__)
 

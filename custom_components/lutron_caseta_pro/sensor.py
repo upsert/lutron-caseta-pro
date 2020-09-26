@@ -7,17 +7,12 @@ depending on the button press.
 import logging
 
 from homeassistant.components.sensor import DOMAIN
-from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID
+from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 from homeassistant.helpers.entity import Entity
 
-from . import (
-    Caseta,
-    CONF_BUTTONS,
-    ATTR_AREA_NAME,
-    CONF_AREA_NAME,
-    ATTR_INTEGRATION_ID,
-    DOMAIN as COMPONENT_DOMAIN,
-)
+from . import ATTR_AREA_NAME, ATTR_INTEGRATION_ID, CONF_AREA_NAME, CONF_BUTTONS
+from . import DOMAIN as COMPONENT_DOMAIN
+from . import Caseta
 
 _LOGGER = logging.getLogger(__name__)
 
