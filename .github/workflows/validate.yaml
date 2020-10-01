@@ -3,8 +3,6 @@ name: Validate
 on:
   push:
   pull_request:
-  schedule:
-    - cron: "0 0 * * *"
 
 jobs:
   validate_hacs:
@@ -13,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Validate
-        uses: hacs/integration/action@master
+        uses: hacs/integration/action@main
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CATEGORY: integration
