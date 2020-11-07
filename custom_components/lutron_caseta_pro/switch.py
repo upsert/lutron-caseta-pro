@@ -5,16 +5,12 @@ Provides switch functionality for Home Assistant.
 """
 import logging
 
-from homeassistant.components.switch import SwitchDevice, DOMAIN
-from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_MAC, CONF_NAME, CONF_ID
+from homeassistant.components.switch import DOMAIN, SwitchEntity
+from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 
-from . import (
-    Caseta,
-    ATTR_AREA_NAME,
-    CONF_AREA_NAME,
-    ATTR_INTEGRATION_ID,
-    DOMAIN as COMPONENT_DOMAIN,
-)
+from . import ATTR_AREA_NAME, ATTR_INTEGRATION_ID, CONF_AREA_NAME
+from . import DOMAIN as COMPONENT_DOMAIN
+from . import Caseta
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -85,7 +81,7 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     bridge.start(hass)
 
 
-class CasetaSwitch(SwitchDevice):
+class CasetaSwitch(SwitchEntity):
     """Representation of a Lutron switch."""
 
     def __init__(self, switch, data, mac):
