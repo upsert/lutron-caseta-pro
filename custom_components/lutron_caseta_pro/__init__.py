@@ -14,6 +14,7 @@ import logging
 import os.path
 import weakref
 
+import getmac
 import voluptuous as vol
 from homeassistant.components.light import VALID_TRANSITION
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_TYPE
@@ -185,10 +186,22 @@ async def async_setup_bridge(hass, config, fname, bridge):
     for device in devices:
         types[device["type"]].append(device)
 
-    # load MAC address used for unique IDs
-    mac_address = None
+    # load the bridge's MAC address used for generating unique IDs for each device
+    host = bridge[CONF_HOST]
+    mac_address = getmac.get_mac_address(ip=host)
+    _LOGGER.info(f"Discovered Lutron bridge MAC address {mac_address}")
+
+    # Retain the ability for the user to override the MAC address, since if a physical Lutron Bridge
+    # has to be  replaced for some reason (defective), setting this to the old MAC address would allow
+    # the user to not have to reconfigure in Home Assistant possible dozens or more scenes/automations/etc.
+    # In reality, the unique ID should be a logical unique identifier, not physical, except when it is
+    # possible to get a unique identifier from the ACTUAL end physical device (e.g. switch).
     if CONF_MAC in bridge:
-        mac_address = bridge[CONF_MAC]
+        if mac_address != bridge[CONF_MAC]:
+            _LOGGER.info(
+                f"Overriding Lutron bridge's MAC address {mac_address} with configuration mac={bridge[CONF_MAC]}"
+            )
+            mac_address = bridge[CONF_MAC]
 
     # Load default transition time, if present.
     transition_time = None
@@ -205,7 +218,7 @@ async def async_setup_bridge(hass, config, fname, bridge):
                 component,
                 DOMAIN,
                 {
-                    CONF_HOST: bridge[CONF_HOST],
+                    CONF_HOST: host,
                     CONF_MAC: mac_address,
                     CONF_DEVICES: types[device_type],
                     CONF_TRANSITION_TIME: transition_time,
