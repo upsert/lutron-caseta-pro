@@ -3,7 +3,6 @@ Platform for Lutron fans.
 
 Provides fan functionality for Home Assistant.
 """
-import asyncio
 import logging
 
 from homeassistant.components.fan import (
@@ -17,7 +16,14 @@ from homeassistant.components.fan import (
 )
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 
-from . import ATTR_AREA_NAME, ATTR_INTEGRATION_ID, CONF_AREA_NAME, Caseta, CasetaEntity
+from . import (
+    ATTR_AREA_NAME,
+    ATTR_INTEGRATION_ID,
+    CONF_AREA_NAME,
+    Caseta,
+    CasetaData,
+    CasetaEntity,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,57 +37,13 @@ SPEED_MAPPING = {
 }
 
 
-class CasetaData:
-    """Data holder for a fan."""
-
-    def __init__(self, caseta):
-        """Initialize the data holder."""
-        self._caseta = caseta
-        self._devices = []
-
-    @property
-    def devices(self):
-        """Return the device list."""
-        return self._devices
-
-    @property
-    def caseta(self):
-        """Return a reference to Casetify instance."""
-        return self._caseta
-
-    def set_devices(self, devices):
-        """Set the device list."""
-        self._devices = devices
-
-    @asyncio.coroutine
-    def read_output(self, mode, integration, action, value):
-        """Receive output value from the bridge."""
-        # find integration ID in devices
-        if mode == Caseta.OUTPUT:
-            for device in self._devices:
-                if device.integration == integration:
-                    _LOGGER.debug(
-                        "Got fan OUTPUT value: %s %d %d %.2f",
-                        mode,
-                        integration,
-                        action,
-                        value,
-                    )
-                    if action == Caseta.Action.SET:
-                        device.update_state(value)
-                        if device.hass is not None:
-                            device.async_write_ha_state()
-                        break
-
-
 # pylint: disable=unused-argument
-@asyncio.coroutine
-def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Configure the platform."""
     if discovery_info is None:
         return
     bridge = Caseta(discovery_info[CONF_HOST])
-    yield from bridge.open()
+    await bridge.open()
 
     data = CasetaData(bridge)
     devices = [
@@ -117,15 +79,13 @@ class CasetaFan(CasetaEntity, FanEntity):
         self._speed = SPEED_OFF
         self._platform_domain = DOMAIN
 
-    @asyncio.coroutine
-    def async_added_to_hass(self):
+    async def async_added_to_hass(self):
         """Update initial state."""
-        yield from self.query()
+        await self.query()
 
-    @asyncio.coroutine
-    def query(self):
+    async def query(self):
         """Query the bridge for the current level."""
-        yield from self._data.caseta.query(
+        await self._data.caseta.query(
             Caseta.OUTPUT, self._integration, Caseta.Action.SET
         )
 

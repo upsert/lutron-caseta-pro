@@ -29,6 +29,7 @@ from . import (
     CONF_TRANSITION_TIME,
     DEFAULT_TYPE,
     Caseta,
+    CasetaData,
     CasetaEntity,
 )
 
@@ -36,48 +37,6 @@ _LOGGER = logging.getLogger(__name__)
 
 # Max transition time supported is 4 hours
 _MAX_TRANSITION = 14400
-
-
-class CasetaData:
-    """Data holder for a light."""
-
-    def __init__(self, caseta):
-        """Initialize the data holder."""
-        self._caseta = caseta
-        self._devices = []
-
-    @property
-    def devices(self):
-        """Return the device list."""
-        return self._devices
-
-    @property
-    def caseta(self):
-        """Return a reference to Casetify instance."""
-        return self._caseta
-
-    def set_devices(self, devices):
-        """Set the device list."""
-        self._devices = devices
-
-    async def read_output(self, mode, integration, action, value):
-        """Receive output value from the bridge."""
-        # find integration ID in devices
-        if mode == Caseta.OUTPUT:
-            for device in self._devices:
-                if device.integration == integration:
-                    _LOGGER.debug(
-                        "Got light OUTPUT value: %s %d %d %f",
-                        mode,
-                        integration,
-                        action,
-                        value,
-                    )
-                    if action == Caseta.Action.SET:
-                        device.update_state(value)
-                        if device.hass is not None:
-                            device.async_write_ha_state()
-                        break
 
 
 # pylint: disable=unused-argument

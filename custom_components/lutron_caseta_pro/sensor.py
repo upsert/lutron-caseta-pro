@@ -16,59 +16,51 @@ from . import (
     CONF_AREA_NAME,
     CONF_BUTTONS,
     Caseta,
+    CasetaData,
     CasetaEntity,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class CasetaData:
-    """Data holder for a sensor."""
+class CasetaSensorData(CasetaData):
+    """Caseta Data holder for sensor devices."""
 
-    def __init__(self, caseta, hass):
-        """Initialize the data holder."""
-        self._caseta = caseta
-        self._hass = hass
-        self._devices = []
-
-    @property
-    def devices(self):
-        """Return the device list."""
-        return self._devices
-
-    @property
-    def caseta(self):
-        """Return a reference to Casetify instance."""
-        return self._caseta
-
-    def set_devices(self, devices):
-        """Set the device list."""
-        self._devices = devices
-
-    async def read_output(self, mode, integration, component, value):
+    async def read_output(self, mode, integration, action, value):
         """Receive output value from the bridge."""
-        if mode == Caseta.DEVICE:
-            for device in self._devices:
-                if device.integration == integration:
-                    _LOGGER.debug(
-                        "Got DEVICE value: %s %d %d %d",
-                        mode,
-                        integration,
-                        component,
-                        value,
-                    )
-                    state = 1 << component - device.minbutton
-                    if value == Caseta.Button.PRESS:
-                        _LOGGER.debug("Got Button Press, updating value to: %s", state)
-                        device.update_state(state)
-                        device.async_write_ha_state()
-                    elif value == Caseta.Button.RELEASE:
-                        device.update_state(0)
-                        _LOGGER.debug(
-                            "Got Button Release, updating value to: %s", device.state
-                        )
-                        device.async_write_ha_state()
-                    break
+        if mode != Caseta.DEVICE:
+            return
+
+        device = self._devices.get(integration)
+        if device is None:
+            _LOGGER.debug(
+                "No DEVICE found for value: %s %d %d %d",
+                mode,
+                integration,
+                action,
+                value,
+            )
+            return
+
+        _LOGGER.debug(
+            "Got DEVICE value: %s %d %d %d",
+            mode,
+            integration,
+            action,
+            value,
+        )
+
+        state = 0
+        if value == Caseta.Button.PRESS:
+            state = 1 << action - device.minbutton
+            _LOGGER.debug("Got Button Press, updating value to: %s", state)
+        elif value == Caseta.Button.RELEASE:
+            _LOGGER.debug("Got Button Release, updating value to: %s", state)
+        else:
+            return
+
+        device.update_state(state)
+        device.async_write_ha_state()
 
 
 # pylint: disable=unused-argument
@@ -79,7 +71,7 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     bridge = Caseta(discovery_info[CONF_HOST])
     await bridge.open()
 
-    data = CasetaData(bridge, hass)
+    data = CasetaSensorData(bridge)
     devices = [
         CasetaPicoRemote(pico, data, discovery_info[CONF_MAC])
         for pico in discovery_info[CONF_DEVICES]

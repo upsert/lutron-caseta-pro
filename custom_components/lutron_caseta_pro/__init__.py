@@ -420,3 +420,54 @@ class CasetaEntity(Entity):
                 DOMAIN, self._platform_domain, self._mac, self._integration
             )
         return None
+
+
+class CasetaData:
+    """Caseta Data holder."""
+
+    def __init__(self, caseta):
+        """Initialize the data holder."""
+        self.caseta = caseta
+        self._devices = []
+
+    @property
+    def devices(self):
+        """Return the device list."""
+        return self._devices
+
+    def set_devices(self, devices):
+        """Set the device list."""
+        self._devices = {device.integration: device for device in devices}
+
+    async def read_output(self, mode, integration, action, value):
+        """Receive output value from the bridge."""
+        # Expect: ~OUTPUT,Integration ID,Action Number,Parameters
+        if mode != Caseta.OUTPUT:
+            return
+
+        device = self._devices.get(integration)
+        if device is None:
+            _LOGGER.debug(
+                "No DEVICE found for value: %s %d %d %d",
+                mode,
+                integration,
+                action,
+                value,
+            )
+            return
+
+        _LOGGER.debug(
+            "Got OUTPUT value: %s %d %d %f",
+            mode,
+            integration,
+            action,
+            value,
+        )
+        if action != Caseta.Action.SET:
+            return
+
+        # update zone level, e.g. 90.00
+        device.update_state(value)
+
+        if device.hass is not None:
+            device.async_write_ha_state()
