@@ -11,8 +11,7 @@ from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF
 from homeassistant.helpers.entity import Entity
 
 from . import ATTR_AREA_NAME, ATTR_INTEGRATION_ID, CONF_AREA_NAME, CONF_BUTTONS
-from . import DOMAIN as COMPONENT_DOMAIN
-from . import Caseta
+from . import Caseta, CasetaEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -56,13 +55,13 @@ class CasetaData:
                     if value == Caseta.Button.PRESS:
                         _LOGGER.debug("Got Button Press, updating value to: %s", state)
                         device.update_state(state)
-                        await device.async_update_ha_state()
+                        device.async_write_ha_state()
                     elif value == Caseta.Button.RELEASE:
                         device.update_state(0)
                         _LOGGER.debug(
                             "Got Button Release, updating value to: %s", device.state
                         )
-                        await device.async_update_ha_state()
+                        device.async_write_ha_state()
                     break
 
 
@@ -91,7 +90,7 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
 
 
 # pylint: disable=too-many-instance-attributes
-class CasetaPicoRemote(Entity):
+class CasetaPicoRemote(CasetaEntity, Entity):
     """Representation of a Lutron Pico remote."""
 
     def __init__(self, pico, data, mac):
@@ -111,25 +110,7 @@ class CasetaPicoRemote(Entity):
                 self._minbutton = button_num
         self._state = 0
         self._mac = mac
-
-    @property
-    def integration(self):
-        """Return the Integration ID."""
-        return self._integration
-
-    @property
-    def unique_id(self) -> str:
-        """Return a unique ID."""
-        if self._mac is not None:
-            return "{}_{}_{}_{}".format(
-                COMPONENT_DOMAIN, DOMAIN, self._mac, self._integration
-            )
-        return None
-
-    @property
-    def name(self):
-        """Return the display name of this Pico."""
-        return self._name
+        self._platform_domain = DOMAIN
 
     @property
     def device_state_attributes(self):

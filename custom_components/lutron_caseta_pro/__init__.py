@@ -19,6 +19,7 @@ from homeassistant.components.light import VALID_TRANSITION
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_TYPE
 from homeassistant.helpers import discovery
 from homeassistant.helpers.config_validation import ensure_list, positive_int, string
+from homeassistant.helpers.entity import Entity
 
 # pylint: disable=relative-beyond-top-level
 from . import casetify
@@ -391,3 +392,31 @@ class Caseta:
     def __setattr__(self, name, value):
         """Return setter on the instance."""
         setattr(self.instance, name, value)
+
+
+class CasetaEntity(Entity):
+    """Base entity."""
+
+    @property
+    def should_poll(self):
+        """No need to poll for updates."""
+        return False
+
+    @property
+    def integration(self):
+        """Return the integration ID."""
+        return self._integration
+
+    @property
+    def name(self):
+        """Return the display name of this device."""
+        return self._name
+
+    @property
+    def unique_id(self) -> str:
+        """Return a unique ID."""
+        if self._mac is not None:
+            return "{}_{}_{}_{}".format(
+                DOMAIN, self._platform_domain, self._mac, self._integration
+            )
+        return None

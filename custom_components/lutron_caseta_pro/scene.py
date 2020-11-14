@@ -5,12 +5,12 @@ Provides access to the scenes defined in Lutron system.
 """
 import logging
 
-from homeassistant.components.scene import DOMAIN, Scene
+from homeassistant.components.scene import Scene, DOMAIN
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 
 from . import ATTR_SCENE_ID, CONF_SCENE_ID
 from . import DOMAIN as COMPONENT_DOMAIN
-from . import Caseta
+from . import Caseta, CasetaEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     bridge.start(hass)
 
 
-class CasetaScene(Scene):
+class CasetaScene(CasetaEntity, Scene):
     """Representation of a Lutron scene."""
 
     def __init__(self, scene, data, mac):
@@ -93,11 +93,6 @@ class CasetaScene(Scene):
         self._integration = int(scene[CONF_ID])
         self._scene_id = int(scene[CONF_SCENE_ID])
         self._mac = mac
-
-    @property
-    def integration(self):
-        """Return the integration ID."""
-        return self._integration
 
     @property
     def scene_id(self):
@@ -112,11 +107,6 @@ class CasetaScene(Scene):
                 COMPONENT_DOMAIN, DOMAIN, self._mac, self._integration, self._scene_id
             )
         return None
-
-    @property
-    def name(self):
-        """Return the display name of this scene."""
-        return self._name
 
     @property
     def device_state_attributes(self):

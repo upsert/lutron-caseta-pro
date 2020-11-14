@@ -17,8 +17,7 @@ from homeassistant.components.cover import (
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 
 from . import ATTR_AREA_NAME, ATTR_INTEGRATION_ID, CONF_AREA_NAME
-from . import DOMAIN as COMPONENT_DOMAIN
-from . import Caseta
+from . import Caseta, CasetaEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,7 +64,7 @@ class CasetaData:
                         # update zone level, e.g. 90.00
                         device.update_state(value)
                         if device.hass is not None:
-                            await device.async_update_ha_state()
+                            device.async_write_ha_state()
                         break
 
 
@@ -93,7 +92,7 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     bridge.start(hass)
 
 
-class CasetaCover(CoverEntity):
+class CasetaCover(CasetaEntity, CoverEntity):
     """Representation of a Lutron shade."""
 
     def __init__(self, cover, data, mac):
@@ -108,6 +107,7 @@ class CasetaCover(CoverEntity):
         self._integration = int(cover[CONF_ID])
         self._position = 0
         self._mac = mac
+        self._platform_domain = DOMAIN
 
     async def async_added_to_hass(self):
         """Update initial state."""
@@ -122,25 +122,6 @@ class CasetaCover(CoverEntity):
     def update_state(self, new_position):
         """Update position value."""
         self._position = new_position
-
-    @property
-    def integration(self):
-        """Return the integration ID."""
-        return self._integration
-
-    @property
-    def unique_id(self) -> str:
-        """Return a unique ID."""
-        if self._mac is not None:
-            return "{}_{}_{}_{}".format(
-                COMPONENT_DOMAIN, DOMAIN, self._mac, self._integration
-            )
-        return None
-
-    @property
-    def name(self):
-        """Return the display name of this device."""
-        return self._name
 
     @property
     def device_state_attributes(self):
