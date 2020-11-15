@@ -29,8 +29,7 @@ from . import (
     CONF_TRANSITION_TIME,
     DEFAULT_TYPE,
 )
-from . import DOMAIN as COMPONENT_DOMAIN
-from . import Caseta
+from . import Caseta, CasetaEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -76,7 +75,7 @@ class CasetaData:
                     if action == Caseta.Action.SET:
                         device.update_state(value)
                         if device.hass is not None:
-                            await device.async_update_ha_state()
+                            device.async_write_ha_state()
                         break
 
 
@@ -130,7 +129,7 @@ def _format_transition(transition) -> str:
 
 
 # pylint: disable=too-many-instance-attributes
-class CasetaLight(LightEntity):
+class CasetaLight(CasetaEntity, LightEntity):
     """Representation of a Lutron light."""
 
     def __init__(self, light, data, mac, transition):
@@ -148,6 +147,7 @@ class CasetaLight(LightEntity):
         self._brightness = 0
         self._mac = mac
         self._default_transition = transition
+        self._platform_domain = DOMAIN
 
     async def async_added_to_hass(self):
         """Update initial state."""
@@ -158,25 +158,6 @@ class CasetaLight(LightEntity):
         await self._data.caseta.query(
             Caseta.OUTPUT, self._integration, Caseta.Action.SET
         )
-
-    @property
-    def integration(self):
-        """Return the Integration ID."""
-        return self._integration
-
-    @property
-    def unique_id(self) -> str:
-        """Return a unique ID."""
-        if self._mac is not None:
-            return "{}_{}_{}_{}".format(
-                COMPONENT_DOMAIN, DOMAIN, self._mac, self._integration
-            )
-        return None
-
-    @property
-    def name(self):
-        """Return the display name of this light."""
-        return self._name
 
     @property
     def device_state_attributes(self):

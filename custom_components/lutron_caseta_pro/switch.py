@@ -9,8 +9,7 @@ from homeassistant.components.switch import DOMAIN, SwitchEntity
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 
 from . import ATTR_AREA_NAME, ATTR_INTEGRATION_ID, CONF_AREA_NAME
-from . import DOMAIN as COMPONENT_DOMAIN
-from . import Caseta
+from . import Caseta, CasetaEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,7 +52,7 @@ class CasetaData:
                     if action == Caseta.Action.SET:
                         device.update_state(value)
                         if device.hass is not None:
-                            await device.async_update_ha_state()
+                            device.async_write_ha_state()
                         break
 
 
@@ -81,7 +80,7 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     bridge.start(hass)
 
 
-class CasetaSwitch(SwitchEntity):
+class CasetaSwitch(CasetaEntity, SwitchEntity):
     """Representation of a Lutron switch."""
 
     def __init__(self, switch, data, mac):
@@ -96,6 +95,7 @@ class CasetaSwitch(SwitchEntity):
         self._integration = int(switch[CONF_ID])
         self._is_on = False
         self._mac = mac
+        self._platform_domain = DOMAIN
 
     async def async_added_to_hass(self):
         """Update initial state."""
@@ -106,25 +106,6 @@ class CasetaSwitch(SwitchEntity):
         await self._data.caseta.query(
             Caseta.OUTPUT, self._integration, Caseta.Action.SET
         )
-
-    @property
-    def integration(self):
-        """Return the Integration ID."""
-        return self._integration
-
-    @property
-    def unique_id(self) -> str:
-        """Return a unique ID."""
-        if self._mac is not None:
-            return "{}_{}_{}_{}".format(
-                COMPONENT_DOMAIN, DOMAIN, self._mac, self._integration
-            )
-        return None
-
-    @property
-    def name(self):
-        """Return the display name of this switch."""
-        return self._name
 
     @property
     def device_state_attributes(self):

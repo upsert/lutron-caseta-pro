@@ -18,8 +18,7 @@ from homeassistant.components.fan import (
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 
 from . import ATTR_AREA_NAME, ATTR_INTEGRATION_ID, CONF_AREA_NAME
-from . import DOMAIN as COMPONENT_DOMAIN
-from . import Caseta
+from . import Caseta, CasetaEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -72,7 +71,7 @@ class CasetaData:
                     if action == Caseta.Action.SET:
                         device.update_state(value)
                         if device.hass is not None:
-                            yield from device.async_update_ha_state()
+                            device.async_write_ha_state()
                         break
 
 
@@ -101,7 +100,7 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     bridge.start(hass)
 
 
-class CasetaFan(FanEntity):
+class CasetaFan(CasetaEntity, FanEntity):
     """Representation of a Lutron fan."""
 
     def __init__(self, fan, data, mac):
@@ -117,6 +116,7 @@ class CasetaFan(FanEntity):
         self._is_on = False
         self._mac = mac
         self._speed = SPEED_OFF
+        self._platform_domain = DOMAIN
 
     @asyncio.coroutine
     def async_added_to_hass(self):
@@ -129,30 +129,6 @@ class CasetaFan(FanEntity):
         yield from self._data.caseta.query(
             Caseta.OUTPUT, self._integration, Caseta.Action.SET
         )
-
-    @property
-    def integration(self):
-        """Return the Integration ID."""
-        return self._integration
-
-    @property
-    def unique_id(self) -> str:
-        """Return a unique ID."""
-        if self._mac is not None:
-            return "{}_{}_{}_{}".format(
-                COMPONENT_DOMAIN, DOMAIN, self._mac, self._integration
-            )
-        return None
-
-    @property
-    def name(self):
-        """Return the display name of this fan."""
-        return self._name
-
-    @property
-    def should_poll(self):
-        """No polling needed for fan."""
-        return False
 
     @property
     def device_state_attributes(self):
