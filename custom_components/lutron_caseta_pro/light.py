@@ -28,8 +28,9 @@ from . import (
     CONF_AREA_NAME,
     CONF_TRANSITION_TIME,
     DEFAULT_TYPE,
+    Caseta,
+    CasetaEntity,
 )
-from . import Caseta, CasetaEntity
 
 _LOGGER = logging.getLogger(__name__)
 

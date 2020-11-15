@@ -10,8 +10,14 @@ from homeassistant.components.sensor import DOMAIN
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 from homeassistant.helpers.entity import Entity
 
-from . import ATTR_AREA_NAME, ATTR_INTEGRATION_ID, CONF_AREA_NAME, CONF_BUTTONS
-from . import Caseta, CasetaEntity
+from . import (
+    ATTR_AREA_NAME,
+    ATTR_INTEGRATION_ID,
+    CONF_AREA_NAME,
+    CONF_BUTTONS,
+    Caseta,
+    CasetaEntity,
+)
 
 _LOGGER = logging.getLogger(__name__)
 

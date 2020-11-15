@@ -5,7 +5,7 @@ Provides access to the scenes defined in Lutron system.
 """
 import logging
 
-from homeassistant.components.scene import Scene, DOMAIN
+from homeassistant.components.scene import DOMAIN, Scene
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 
 from . import ATTR_SCENE_ID, CONF_SCENE_ID
