@@ -10,53 +10,32 @@ from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF
 
 from . import ATTR_SCENE_ID, CONF_SCENE_ID
 from . import DOMAIN as COMPONENT_DOMAIN
-from . import Caseta, CasetaEntity
+from . import Caseta, CasetaData, CasetaEntity
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class CasetaData:
-    """Data holder for a scene."""
-
-    def __init__(self, caseta, hass):
-        """Initialize the data holder."""
-        self._caseta = caseta
-        self._hass = hass
-        self._devices = []
-        self._added = {}
-        self._later = None
-
-    @property
-    def devices(self):
-        """Return list of devices."""
-        return self._devices
-
-    @property
-    def caseta(self):
-        """Return Caseta reference."""
-        return self._caseta
+class CasetaSceneData(CasetaData):
+    """Caseta Data holder."""
 
     def set_devices(self, devices):
-        """Set the list of devices."""
-        self._devices = devices
+        """Set the device list."""
+        self._devices = {device.scene_id: device for device in devices}
 
-    async def read_output(self, mode, integration, component, action):
+    async def read_output(self, mode, integration, action, value):
         """Receive output value from the bridge."""
         # only monitor integration ID 1 for scenes
-        if mode == Caseta.DEVICE and integration == 1:
-            # Expecting: ~DEVICE,1,Component Number,Action Number
-            _LOGGER.debug(
-                "Got scene DEVICE value: %s %d %d %d",
-                mode,
-                integration,
-                component,
-                action,
-            )
-            for device in self._devices:
-                if device.scene_id == component and action == Caseta.Button.PRESS:
-                    _LOGGER.info("Scene %s activated.", component)
-                    # nothing to update in Home Assistant for scenes
-                    break
+        # Expecting: ~DEVICE,1,Component Number,Action Number
+        if mode != Caseta.DEVICE or integration != 1:
+            return
+
+        device = self._devices.get(action)
+        if device is None:
+            return
+
+        if action == Caseta.Button.PRESS:
+            _LOGGER.info("Scene %s activated.", action)
+            # nothing to update in Home Assistant for scenes
 
 
 # pylint: disable=unused-argument
@@ -67,7 +46,7 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     bridge = Caseta(discovery_info[CONF_HOST])
     await bridge.open()
 
-    data = CasetaData(bridge, hass)
+    data = CasetaSceneData(bridge)
     devices = [
         CasetaScene(scene, data, discovery_info[CONF_MAC])
         for scene in discovery_info[CONF_DEVICES]

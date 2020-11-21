@@ -16,55 +16,16 @@ from homeassistant.components.cover import (
 )
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 
-from . import ATTR_AREA_NAME, ATTR_INTEGRATION_ID, CONF_AREA_NAME, Caseta, CasetaEntity
+from . import (
+    ATTR_AREA_NAME,
+    ATTR_INTEGRATION_ID,
+    CONF_AREA_NAME,
+    Caseta,
+    CasetaData,
+    CasetaEntity,
+)
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class CasetaData:
-    """Data holder for a shade."""
-
-    def __init__(self, caseta, hass):
-        """Initialize the data holder."""
-        self._caseta = caseta
-        self._hass = hass
-        self._devices = []
-        self._added = {}
-        self._later = None
-
-    @property
-    def devices(self):
-        """Return list of devices."""
-        return self._devices
-
-    @property
-    def caseta(self):
-        """Return Caseta reference."""
-        return self._caseta
-
-    def set_devices(self, devices):
-        """Set the list of devices."""
-        self._devices = devices
-
-    async def read_output(self, mode, integration, action, value):
-        """Receive output value from the bridge."""
-        # Expect: ~OUTPUT,Integration ID,Action Number,Parameters
-        if mode == Caseta.OUTPUT:
-            for device in self._devices:
-                if device.integration == integration:
-                    _LOGGER.debug(
-                        "Got cover OUTPUT value: %s %d %d %f",
-                        mode,
-                        integration,
-                        action,
-                        value,
-                    )
-                    if action == Caseta.Action.SET:
-                        # update zone level, e.g. 90.00
-                        device.update_state(value)
-                        if device.hass is not None:
-                            device.async_write_ha_state()
-                        break
 
 
 # pylint: disable=unused-argument
@@ -75,7 +36,7 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     bridge = Caseta(discovery_info[CONF_HOST])
     await bridge.open()
 
-    data = CasetaData(bridge, hass)
+    data = CasetaData(bridge)
     devices = [
         CasetaCover(cover, data, discovery_info[CONF_MAC])
         for cover in discovery_info[CONF_DEVICES]
