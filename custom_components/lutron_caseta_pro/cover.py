@@ -82,6 +82,7 @@ class CasetaCover(CasetaEntity, CoverEntity):
     def update_state(self, new_position):
         """Update position value."""
         self._position = new_position
+        self.async_write_ha_state()
 
     @property
     def device_state_attributes(self):
