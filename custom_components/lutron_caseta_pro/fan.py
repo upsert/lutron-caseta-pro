@@ -30,9 +30,9 @@ _LOGGER = logging.getLogger(__name__)
 SPEED_MEDIUM_HIGH = "medium_high"
 SPEED_MAPPING = {
     SPEED_OFF: 0.00,
-    SPEED_LOW: 25.10,
-    SPEED_MEDIUM: 50.20,
-    SPEED_MEDIUM_HIGH: 75.30,
+    SPEED_LOW: 25.00,
+    SPEED_MEDIUM: 50.00,
+    SPEED_MEDIUM_HIGH: 75.00,
     SPEED_HIGH: 100.00,
 }
 
@@ -149,13 +149,13 @@ class CasetaFan(CasetaEntity, FanEntity):
     def update_state(self, value):
         """Update internal state and fan speed."""
         self._is_on = value > SPEED_MAPPING[SPEED_OFF]
-        if SPEED_MAPPING[SPEED_MEDIUM_HIGH] < value <= SPEED_MAPPING[SPEED_HIGH]:
+        if value == SPEED_MAPPING[SPEED_HIGH]:
             self._speed = SPEED_HIGH
-        elif SPEED_MAPPING[SPEED_MEDIUM] < value <= SPEED_MAPPING[SPEED_MEDIUM_HIGH]:
+        elif value == SPEED_MAPPING[SPEED_MEDIUM_HIGH]:
             self._speed = SPEED_MEDIUM_HIGH
-        elif SPEED_MAPPING[SPEED_LOW] < value <= SPEED_MAPPING[SPEED_MEDIUM]:
+        elif value == SPEED_MAPPING[SPEED_MEDIUM]:
             self._speed = SPEED_MEDIUM
-        elif SPEED_MAPPING[SPEED_OFF] < value <= SPEED_MAPPING[SPEED_LOW]:
+        elif value == SPEED_MAPPING[SPEED_LOW]:
             self._speed = SPEED_LOW
         elif value == SPEED_MAPPING[SPEED_OFF]:
             self._speed = SPEED_OFF
