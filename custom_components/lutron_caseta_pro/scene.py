@@ -88,7 +88,7 @@ class CasetaScene(CasetaEntity, Scene):
         return None
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return device specific state attributes."""
         attr = {ATTR_SCENE_ID: self._scene_id}
         return attr

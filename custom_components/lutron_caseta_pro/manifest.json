@@ -6,5 +6,5 @@
   "dependencies": ["configurator"],
   "codeowners": ["@upsert"],
   "requirements": [],
-  "version": "2021.04"
+  "version": "2021.12"
 }

@@ -111,7 +111,7 @@ class CasetaPicoRemote(CasetaEntity, Entity):
         self._platform_domain = DOMAIN
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return device specific state attributes."""
         attr = {ATTR_INTEGRATION_ID: self._integration}
         if self._area_name:
