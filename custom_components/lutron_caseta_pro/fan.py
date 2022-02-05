@@ -5,11 +5,7 @@ Provides fan functionality for Home Assistant.
 """
 import logging
 
-from homeassistant.components.fan import (
-    DOMAIN,
-    SUPPORT_SET_SPEED,
-    FanEntity,
-)
+from homeassistant.components.fan import DOMAIN, SUPPORT_SET_SPEED, FanEntity
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -112,11 +108,11 @@ class CasetaFan(CasetaEntity, FanEntity):
         return 4
 
     async def async_turn_on(
-            self,
-            speed: str = None,
-            percentage: int = None,
-            preset_mode: str = None,
-            **kwargs
+        self,
+        speed: str = None,
+        percentage: int = None,
+        preset_mode: str = None,
+        **kwargs
     ) -> None:
         """Instruct the fan to turn on."""
         if percentage is None:
@@ -147,4 +143,3 @@ class CasetaFan(CasetaEntity, FanEntity):
         """Update internal state and fan speed."""
         self._percentage = value
         _LOGGER.debug("Fan speed is %s", self._percentage)
-
