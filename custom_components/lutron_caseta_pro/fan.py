@@ -7,14 +7,13 @@ import logging
 
 from homeassistant.components.fan import (
     DOMAIN,
-    SPEED_HIGH,
-    SPEED_LOW,
-    SPEED_MEDIUM,
-    SPEED_OFF,
     SUPPORT_SET_SPEED,
     FanEntity,
 )
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from . import (
     ATTR_AREA_NAME,
@@ -27,18 +26,14 @@ from . import (
 
 _LOGGER = logging.getLogger(__name__)
 
-SPEED_MEDIUM_HIGH = "medium_high"
-SPEED_MAPPING = {
-    SPEED_OFF: 0.00,
-    SPEED_LOW: 25.00,
-    SPEED_MEDIUM: 50.00,
-    SPEED_MEDIUM_HIGH: 75.00,
-    SPEED_HIGH: 100.00,
-}
-
 
 # pylint: disable=unused-argument
-async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
+async def async_setup_platform(
+    hass: HomeAssistant,
+    config: ConfigType,
+    async_add_entities: AddEntitiesCallback,
+    discovery_info: DiscoveryInfoType = None,
+) -> None:
     """Configure the platform."""
     if discovery_info is None:
         return
@@ -52,7 +47,7 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     ]
     data.set_devices(devices)
 
-    async_add_devices(devices, True)
+    async_add_entities(devices, True)
 
     # register callbacks
     bridge.register(data.read_output)
@@ -74,9 +69,8 @@ class CasetaFan(CasetaEntity, FanEntity):
             # if available, prepend area name to fan
             self._name = fan[CONF_AREA_NAME] + " " + fan[CONF_NAME]
         self._integration = int(fan[CONF_ID])
-        self._is_on = False
         self._mac = mac
-        self._speed = SPEED_OFF
+        self._percentage = None
         self._platform_domain = DOMAIN
 
     async def async_added_to_hass(self):
@@ -99,64 +93,58 @@ class CasetaFan(CasetaEntity, FanEntity):
 
     @property
     def is_on(self):
-        """Return true if fan is on."""
-        return self._is_on
+        """Returns if the fan is on"""
+        return self._percentage and self._percentage > 0
 
     @property
-    def speed(self) -> str:
+    def percentage(self) -> int:
         """Return the current speed."""
-        return self._speed
-
-    @property
-    def speed_list(self) -> list:
-        """Get the list of available speeds."""
-        return [SPEED_OFF, SPEED_LOW, SPEED_MEDIUM, SPEED_MEDIUM_HIGH, SPEED_HIGH]
+        return self._percentage
 
     @property
     def supported_features(self) -> int:
         """Flag supported features."""
         return SUPPORT_SET_SPEED
 
-    async def async_turn_on(self, speed: str = None, **kwargs) -> None:
-        """Instruct the fan to turn on."""
-        if speed is None:
-            speed = SPEED_HIGH
-        await self.async_set_speed(speed)
+    @property
+    def speed_count(self) -> int:
+        """Return the number of supported speeds."""
+        return 4
 
-    async def async_set_speed(self, speed: str) -> None:
-        """Set the speed of the fan."""
-        self._speed = speed
-        if speed not in SPEED_MAPPING:
-            _LOGGER.debug("Unknown speed %s, setting to %s", speed, SPEED_HIGH)
-            self._speed = SPEED_HIGH
+    async def async_turn_on(
+            self,
+            speed: str = None,
+            percentage: int = None,
+            preset_mode: str = None,
+            **kwargs
+    ) -> None:
+        """Instruct the fan to turn on."""
+        if percentage is None:
+            percentage = 50
+        await self.async_set_percentage(percentage)
+
+    async def async_set_percentage(self, percentage: int) -> None:
         _LOGGER.debug(
             "Writing fan OUTPUT value: %d %d %.2f",
             self._integration,
             Caseta.Action.SET,
-            SPEED_MAPPING[self._speed],
+            percentage,
         )
         await self._data.caseta.write(
             Caseta.OUTPUT,
             self._integration,
             Caseta.Action.SET,
-            SPEED_MAPPING[self._speed],
+            percentage,
         )
+        self._percentage = percentage
+        self.async_write_ha_state()
 
     async def async_turn_off(self, **kwargs) -> None:
         """Instruct the fan to turn off."""
-        await self.async_set_speed(SPEED_OFF)
+        await self.async_set_percentage(0)
 
     def update_state(self, value):
         """Update internal state and fan speed."""
-        self._is_on = value > SPEED_MAPPING[SPEED_OFF]
-        if value == SPEED_MAPPING[SPEED_HIGH]:
-            self._speed = SPEED_HIGH
-        elif value == SPEED_MAPPING[SPEED_MEDIUM_HIGH]:
-            self._speed = SPEED_MEDIUM_HIGH
-        elif value == SPEED_MAPPING[SPEED_MEDIUM]:
-            self._speed = SPEED_MEDIUM
-        elif value == SPEED_MAPPING[SPEED_LOW]:
-            self._speed = SPEED_LOW
-        elif value == SPEED_MAPPING[SPEED_OFF]:
-            self._speed = SPEED_OFF
-        _LOGGER.debug("Fan speed is %s", self._speed)
+        self._percentage = value
+        _LOGGER.debug("Fan speed is %s", self._percentage)
+

@@ -447,13 +447,6 @@ class CasetaData:
 
         device = self._devices.get(integration)
         if device is None:
-            _LOGGER.debug(
-                "No DEVICE found for value: %s %d %d %d",
-                mode,
-                integration,
-                action,
-                value,
-            )
             return
 
         _LOGGER.debug(
