@@ -13,6 +13,7 @@ jobs:
       - name: Validate
         uses: hacs/action@main
         with:
+          ignore: "brands"
           category: "integration"
   validate_hassfest:
     name: Hassfest
