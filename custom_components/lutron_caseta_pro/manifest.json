@@ -6,6 +6,6 @@
   "dependencies": ["configurator"],
   "codeowners": ["@upsert"],
   "requirements": [],
-  "version": "2021.12",
+  "version": "2022.2",
   "iot_class": "local_push"
 }
