@@ -1,5 +1,5 @@
 {
   "name": "Lutron Caséta Smart Bridge PRO/RA2 Select",
   "domains": [ "cover", "fan", "light", "scene", "sensor", "switch" ],
-  "homeassistant": "0.110"
+  "homeassistant": "2025.1.0"
 }
