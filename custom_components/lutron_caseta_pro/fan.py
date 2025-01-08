@@ -3,9 +3,11 @@ Platform for Lutron fans.
 
 Provides fan functionality for Home Assistant.
 """
-import logging
 
-from homeassistant.components.fan import DOMAIN, SUPPORT_SET_SPEED, FanEntity
+import logging
+from typing import Any
+
+from homeassistant.components.fan import DOMAIN, FanEntity, FanEntityFeature
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -18,6 +20,10 @@ from . import (
     Caseta,
     CasetaData,
     CasetaEntity,
+)
+
+FAN_SUPPORT = (
+    FanEntityFeature.SET_SPEED | FanEntityFeature.TURN_OFF | FanEntityFeature.TURN_ON
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -93,14 +99,14 @@ class CasetaFan(CasetaEntity, FanEntity):
         return self._percentage and self._percentage > 0
 
     @property
-    def percentage(self) -> int:
+    def percentage(self) -> int | None:
         """Return the current speed."""
         return self._percentage
 
     @property
-    def supported_features(self) -> int:
+    def supported_features(self) -> FanEntityFeature:
         """Flag supported features."""
-        return SUPPORT_SET_SPEED
+        return FAN_SUPPORT
 
     @property
     def speed_count(self) -> int:
@@ -109,10 +115,9 @@ class CasetaFan(CasetaEntity, FanEntity):
 
     async def async_turn_on(
         self,
-        speed: str = None,
-        percentage: int = None,
-        preset_mode: str = None,
-        **kwargs
+        percentage: int | None = None,
+        preset_mode: str | None = None,
+        **kwargs: Any,
     ) -> None:
         """Instruct the fan to turn on."""
         if percentage is None:
@@ -135,7 +140,7 @@ class CasetaFan(CasetaEntity, FanEntity):
         self._percentage = percentage
         self.async_write_ha_state()
 
-    async def async_turn_off(self, **kwargs) -> None:
+    async def async_turn_off(self, **kwargs: Any) -> None:
         """Instruct the fan to turn off."""
         await self.async_set_percentage(0)
 

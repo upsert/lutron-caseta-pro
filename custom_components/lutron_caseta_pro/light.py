@@ -3,15 +3,17 @@ Platform for Lutron dimmers for lights.
 
 Provides dimmable light functionality for Home Assistant.
 """
+
 import logging
+from typing import Any
 
 from homeassistant.components.light import (
     ATTR_BRIGHTNESS,
     ATTR_TRANSITION,
     DOMAIN,
-    SUPPORT_BRIGHTNESS,
-    SUPPORT_TRANSITION,
+    ColorMode,
     LightEntity,
+    LightEntityFeature,
 )
 from homeassistant.const import (
     CONF_DEVICES,
@@ -77,14 +79,12 @@ def _format_transition(transition) -> str:
         transition = _MAX_TRANSITION
     if transition < 60:
         # format to two decimals for less than 60 seconds
-        transition = "{:0>.2f}".format(transition)
+        transition = f"{transition:0>.2f}"
     else:
         # else format HH:MM:SS
         minutes, seconds = divmod(transition, 60)
         hours, minutes = divmod(minutes, 60)
-        transition = "{:0>2d}:{:0>2d}:{:0>2d}".format(
-            int(hours), int(minutes), int(seconds)
-        )
+        transition = f"{int(hours):0>2d}:{int(minutes):0>2d}:{int(seconds):0>2d}"
     return transition
 
 
@@ -108,8 +108,13 @@ class CasetaLight(CasetaEntity, LightEntity):
         self._mac = mac
         self._default_transition = transition
         self._platform_domain = DOMAIN
+        self._attr_supported_features = (
+            LightEntityFeature.TRANSITION if self._is_dimmer else 0
+        )
+        self._color_mode = ColorMode.BRIGHTNESS
+        self._color_modes = {self._color_mode}
 
-    async def async_added_to_hass(self):
+    async def async_added_to_hass(self) -> None:
         """Update initial state."""
         await self.query()
 
@@ -128,9 +133,14 @@ class CasetaLight(CasetaEntity, LightEntity):
         return attr
 
     @property
-    def brightness(self):
+    def brightness(self) -> int | None:
         """Brightness of the light (an integer in the range 1-255)."""
         return int((self._brightness / 100) * 255)
+
+    @property
+    def color_mode(self) -> str | None:
+        """Return the color mode of the light."""
+        return self._color_mode
 
     @property
     def is_on(self):
@@ -138,17 +148,22 @@ class CasetaLight(CasetaEntity, LightEntity):
         return self._is_on
 
     @property
-    def supported_features(self):
+    def supported_features(self) -> int | None:
         """Flag supported features."""
-        return (SUPPORT_BRIGHTNESS | SUPPORT_TRANSITION) if self._is_dimmer else 0
+        return self._attr_supported_features
 
-    async def async_turn_on(self, **kwargs):
+    @property
+    def supported_color_modes(self) -> set[ColorMode]:
+        """Flag supported color modes."""
+        return self._color_modes
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
         """Instruct the light to turn on."""
         value = 100
         transition = None
         if self._is_dimmer:
             if ATTR_BRIGHTNESS in kwargs:
-                value = "{:0>.2f}".format((kwargs[ATTR_BRIGHTNESS] / 255) * 100)
+                value = f"{(kwargs[ATTR_BRIGHTNESS] / 255) * 100:0>.2f}"
             if ATTR_TRANSITION in kwargs:
                 transition = _format_transition(float(kwargs[ATTR_TRANSITION]))
             elif self._default_transition is not None:
@@ -164,7 +179,7 @@ class CasetaLight(CasetaEntity, LightEntity):
             Caseta.OUTPUT, self._integration, Caseta.Action.SET, value, transition
         )
 
-    async def async_turn_off(self, **kwargs):
+    async def async_turn_off(self, **kwargs: Any) -> None:
         """Instruct the light to turn off."""
         transition = None
         if self._is_dimmer:
@@ -182,7 +197,7 @@ class CasetaLight(CasetaEntity, LightEntity):
             Caseta.OUTPUT, self._integration, Caseta.Action.SET, 0, transition
         )
 
-    def update_state(self, brightness):
+    def update_state(self, brightness: int) -> None:
         """Update brightness value."""
         if self._is_dimmer:
             self._brightness = brightness

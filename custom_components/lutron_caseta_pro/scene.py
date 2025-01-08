@@ -3,14 +3,14 @@ Platform for Lutron scenes.
 
 Provides access to the scenes defined in Lutron system.
 """
+
 import logging
 
 from homeassistant.components.scene import DOMAIN, Scene
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 
-from . import ATTR_SCENE_ID, CONF_SCENE_ID
+from . import ATTR_SCENE_ID, CONF_SCENE_ID, Caseta, CasetaData, CasetaEntity
 from . import DOMAIN as COMPONENT_DOMAIN
-from . import Caseta, CasetaData, CasetaEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -82,9 +82,7 @@ class CasetaScene(CasetaEntity, Scene):
     def unique_id(self) -> str:
         """Return a unique ID."""
         if self._mac is not None:
-            return "{}_{}_{}_{}_{}".format(
-                COMPONENT_DOMAIN, DOMAIN, self._mac, self._integration, self._scene_id
-            )
+            return f"{COMPONENT_DOMAIN}_{DOMAIN}_{self._mac}_{self._integration}_{self._scene_id}"
         return None
 
     @property

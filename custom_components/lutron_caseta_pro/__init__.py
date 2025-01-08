@@ -167,7 +167,7 @@ async def async_setup_bridge(hass, config, fname, bridge):
     """Initialize a bridge by loading its integration report."""
     _LOGGER.debug("Setting up bridge using Integration Report %s", fname)
 
-    devices = await casetify.async_load_integration_report(fname)
+    devices = await hass.async_add_executor_job(casetify.load_integration_report, fname)
 
     # Patch up device types from configuration.
     # All other devices will be treated as lights.
@@ -200,7 +200,7 @@ async def async_setup_bridge(hass, config, fname, bridge):
     for device_type in types:
         component = device_type
         _LOGGER.debug("Loading platform %s", component)
-        hass.async_add_job(
+        hass.async_create_task(
             discovery.async_load_platform(
                 hass,
                 component,
@@ -416,9 +416,7 @@ class CasetaEntity(Entity):
     def unique_id(self) -> str:
         """Return a unique ID."""
         if self._mac is not None:
-            return "{}_{}_{}_{}".format(
-                DOMAIN, self._platform_domain, self._mac, self._integration
-            )
+            return f"{DOMAIN}_{self._platform_domain}_{self._mac}_{self._integration}"
         return None
 
 

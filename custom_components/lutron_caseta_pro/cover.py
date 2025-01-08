@@ -3,16 +3,15 @@ Platform for Lutron shades.
 
 Provides shade functionality for Home Assistant.
 """
+
 import logging
+from typing import Any
 
 from homeassistant.components.cover import (
     ATTR_POSITION,
     DOMAIN,
-    SUPPORT_CLOSE,
-    SUPPORT_OPEN,
-    SUPPORT_SET_POSITION,
-    SUPPORT_STOP,
     CoverEntity,
+    CoverEntityFeature,
 )
 from homeassistant.const import CONF_DEVICES, CONF_HOST, CONF_ID, CONF_MAC, CONF_NAME
 
@@ -23,6 +22,13 @@ from . import (
     Caseta,
     CasetaData,
     CasetaEntity,
+)
+
+COVER_SUPPORT = (
+    CoverEntityFeature.CLOSE
+    | CoverEntityFeature.OPEN
+    | CoverEntityFeature.SET_POSITION
+    | CoverEntityFeature.STOP
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -102,9 +108,14 @@ class CasetaCover(CasetaEntity, CoverEntity):
         """Return current position of the cover."""
         return self._position
 
-    async def async_open_cover(self, **kwargs):
+    async def async_open_cover(self, **kwargs: Any):
         """Open the cover."""
-        # Rasing must be used for STOP to work
+        _LOGGER.debug(
+            "Writing cover OUTPUT value: %d %d",
+            self._integration,
+            Caseta.Action.RAISING,
+        )
+        # Raising must be used for STOP to work
         await self._data.caseta.write(
             Caseta.OUTPUT, self._integration, Caseta.Action.RAISING, None
         )
@@ -114,8 +125,13 @@ class CasetaCover(CasetaEntity, CoverEntity):
         # will not do this on a Caseta.Action.RAISING
         self.update_state(100)
 
-    async def async_close_cover(self, **kwargs):
+    async def async_close_cover(self, **kwargs: Any):
         """Close the cover."""
+        _LOGGER.debug(
+            "Writing cover OUTPUT value: %d %d",
+            self._integration,
+            Caseta.Action.LOWERING,
+        )
         # Lowering must be used for STOP to work
         await self._data.caseta.write(
             Caseta.OUTPUT, self._integration, Caseta.Action.LOWERING, None
@@ -126,7 +142,7 @@ class CasetaCover(CasetaEntity, CoverEntity):
         # will not do this on a Caseta.Action.LOWERING
         self.update_state(0)
 
-    async def async_set_cover_position(self, **kwargs):
+    async def async_set_cover_position(self, **kwargs: Any):
         """Move the cover to a specific position."""
         if ATTR_POSITION in kwargs:
             position = kwargs[ATTR_POSITION]
@@ -139,6 +155,14 @@ class CasetaCover(CasetaEntity, CoverEntity):
                     "Tried to set cover position to greater than maximum value 100."
                 )
                 position = 100
+            _LOGGER.debug(
+                "Writing cover OUTPUT value: %d %d %d %d %d",
+                self._integration,
+                Caseta.Action.SET,
+                position,
+                0,
+                0,
+            )
             # Parameters are Level, Fade, Delay
             # Fade is ignored and Delay set to 0
             await self._data.caseta.write(
@@ -146,11 +170,11 @@ class CasetaCover(CasetaEntity, CoverEntity):
             )
 
     @property
-    def supported_features(self):
+    def supported_features(self) -> CoverEntityFeature:
         """Flag supported features."""
-        return SUPPORT_OPEN | SUPPORT_CLOSE | SUPPORT_STOP | SUPPORT_SET_POSITION
+        return COVER_SUPPORT
 
-    async def async_stop_cover(self, **kwargs):
+    async def async_stop_cover(self, **kwargs: Any):
         """Stop raising or lowering the shade."""
         await self._data.caseta.write(
             Caseta.OUTPUT, self._integration, Caseta.Action.STOP, None

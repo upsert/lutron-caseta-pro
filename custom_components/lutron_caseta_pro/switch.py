@@ -3,6 +3,7 @@ Platform for Lutron switches.
 
 Provides switch functionality for Home Assistant.
 """
+
 import logging
 
 from homeassistant.components.switch import DOMAIN, SwitchEntity
