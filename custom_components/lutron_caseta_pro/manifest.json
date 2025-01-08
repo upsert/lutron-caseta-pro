@@ -1,12 +1,12 @@
 {
   "domain": "lutron_caseta_pro",
   "name": "Lutron Caséta Smart Bridge PRO / RA2 Select",
-  "documentation": "https://github.com/upsert/lutron-caseta-pro",
-  "issue_tracker": "https://github.com/upsert/lutron-caseta-pro/issues",
-  "dependencies": ["configurator"],
   "codeowners": ["@upsert"],
-  "requirements": [],
-  "version": "2025.1",
+  "dependencies": ["configurator"],
+  "documentation": "https://github.com/upsert/lutron-caseta-pro",
+  "integration_type": "hub",  
   "iot_class": "local_push",
-  "integration_type": "hub"
+  "issue_tracker": "https://github.com/upsert/lutron-caseta-pro/issues",
+  "requirements": [],
+  "version": "2025.1"
 }
