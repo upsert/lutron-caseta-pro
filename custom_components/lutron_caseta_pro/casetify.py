@@ -25,7 +25,7 @@ CONF_BUTTONS = "buttons"
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_load_integration_report(fname):
+def load_integration_report(fname):
     """Process a JSON integration report and return a list of devices.
 
     Each returned device will have an 'id', 'name', 'type' and optionally
