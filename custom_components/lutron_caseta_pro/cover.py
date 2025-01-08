@@ -3,6 +3,7 @@ Platform for Lutron shades.
 
 Provides shade functionality for Home Assistant.
 """
+
 import logging
 from typing import Any
 

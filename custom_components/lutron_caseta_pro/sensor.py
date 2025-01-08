@@ -4,6 +4,7 @@ Platform for sensor for button press from a Pico wireless remote.
 Provides a sensor for each Pico remote with a value that changes
 depending on the button press.
 """
+
 import logging
 
 from homeassistant.components.sensor import DOMAIN

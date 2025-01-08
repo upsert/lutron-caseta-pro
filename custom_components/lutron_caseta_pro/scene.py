@@ -3,6 +3,7 @@ Platform for Lutron scenes.
 
 Provides access to the scenes defined in Lutron system.
 """
+
 import logging
 
 from homeassistant.components.scene import DOMAIN, Scene

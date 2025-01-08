@@ -3,6 +3,7 @@ Platform for Lutron dimmers for lights.
 
 Provides dimmable light functionality for Home Assistant.
 """
+
 import logging
 from typing import Any
 
@@ -135,7 +136,7 @@ class CasetaLight(CasetaEntity, LightEntity):
     def brightness(self) -> int | None:
         """Brightness of the light (an integer in the range 1-255)."""
         return int((self._brightness / 100) * 255)
-    
+
     @property
     def color_mode(self) -> str | None:
         """Return the color mode of the light."""

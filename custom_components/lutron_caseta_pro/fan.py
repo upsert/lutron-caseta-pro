@@ -3,6 +3,7 @@ Platform for Lutron fans.
 
 Provides fan functionality for Home Assistant.
 """
+
 import logging
 from typing import Any
 
